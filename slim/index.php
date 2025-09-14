@@ -22,4 +22,37 @@ $app->add( function ($request, $handler) {
 
 // ACÁ VAN LOS ENDPOINTS
 
+$app->post('/user/login', function (Request $request, Response $response){
+    $data = $request->getParsedBody();
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $usr = new user();
+
+    $result = $usr->login($email,$password);
+    $response->getBody()->write(json_encode([
+        'status'=>$result['status'],
+        'message'=>$result['message']
+    ]));
+    
+    return $response
+        ->withStatus($result['status'])
+        ->withHeader('Content-Type', 'aplication/json');
+});
+
+$app->post('/user/logout', function (Request $request, Response $response){
+    $data = $request->getParsedBody();
+    $id = $data['id'] ?? '';
+    $usr = new user();
+
+    $result = $usr->logout($id);
+    $response->getBody()->write(json_encode([
+        'status'=>$result['status'],
+        'message'=>$result['message']
+    ]));
+    
+    return $response
+        ->withStatus($result['status'])
+        ->withHeader('Content-Type', 'aplication/json');
+});
+
 $app->run();
