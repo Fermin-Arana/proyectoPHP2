@@ -5,6 +5,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 require __DIR__ . '/vendor/autoload.php';
+Require_once __DIR__ . '/Conexion.php';
+Require_once __DIR__ . '/user.php';
 
 $app = AppFactory::create();
 $app->addRoutingMiddleware();
@@ -20,9 +22,8 @@ $app->add( function ($request, $handler) {
     ;
 });
 
-// ACÁ VAN LOS ENDPOINTS
 
-$app->post('/user/login', function (Request $request, Response $response){
+$app->post('/login', function (Request $request, Response $response){
     $data = $request->getParsedBody();
     $email = $data['email'] ?? '';
     $password = $data['password'] ?? '';
@@ -39,7 +40,7 @@ $app->post('/user/login', function (Request $request, Response $response){
         ->withHeader('Content-Type', 'aplication/json');
 });
 
-$app->post('/user/logout', function (Request $request, Response $response){
+$app->post('/logout', function (Request $request, Response $response){
     $data = $request->getParsedBody();
     $id = $data['id'] ?? '';
     $usr = new user();
@@ -54,5 +55,85 @@ $app->post('/user/logout', function (Request $request, Response $response){
         ->withStatus($result['status'])
         ->withHeader('Content-Type', 'aplication/json');
 });
+
+$app->patch('/user/{id}', function (Request $request, Response $response, array $args) {
+    $id = $args['id'];
+    $data = $request->getParsedBody();
+
+    $currentId = $data['currentId'] ?? null;
+
+    $nombre = $data['first_name'] ?? null;
+    $apellido = $data['last_name'] ?? null;
+    $password = $data['password'] ?? null;
+
+    $usr = new user();
+    $result = $usr->editarUsuario($id, $nombre, $apellido, $password);
+
+    $response->getBody()->write(json_encode([
+        'status' => $result['status'],
+        'message' => $result['message']
+    ]));
+
+    return $response
+        ->withStatus($result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+$app->delete('/user/{id}', function (Request $request, Response $response, array $args) {
+    $id = $args['id'];
+    $data = $request->getParsedBody();
+
+    $currentId = $data['currentId'] ?? null;
+
+    $usr = new user();
+    $result = $usr->deleteUser($id, $currentId);
+
+    $response->getBody()->write(json_encode([
+        'status' => $result['status'],
+        'message' => $result['message']
+    ]));
+
+    return $response
+        ->withStatus($result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+$app->get('/user/{id}', function (Request $request, Response $response, array $args) {
+    $id = $args['id'];
+    $data = $request->getQueryParams();
+
+    $currentId = $data['currentId'] ?? null;
+
+    $usr = new user();
+    $result = $usr->getUserById($id, $currentId);
+
+    $response->getBody()->write(json_encode([
+        'status' => $result['status'],
+        'message' => $result['message']
+    ]));
+
+    return $response
+        ->withStatus($result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+$app->get('/users', function (Request $request, Response $response) {
+    $params = $request->getQueryParams();
+    $search = $params['search'] ?? '';
+
+    $usr = new user();
+    $result = $usr->getAllUsers($search);
+
+    $response->getBody()->write(json_encode([
+        'status' => $result['status'],
+        'message' => $result['message']
+    ]));
+
+    return $response
+        ->withStatus($result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+
 
 $app->run();
