@@ -4,116 +4,136 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-require __DIR__ . '/vendor/autoload.php';
-Require_once __DIR__ . '/Conexion.php';
-Require_once __DIR__ . '/user.php';
+require __DIR__ . '/../vendor/autoload.php';
+
+require_once __DIR__ . '/Conexion.php';
+require_once __DIR__ . '/user.php';
+require_once __DIR__ . '/Court.php';
+require_once __DIR__ . '/AuthMiddleware.php';
+require_once __DIR__ . '/AdminMiddleware.php';
 
 $app = AppFactory::create();
+
+$app->setBasePath('/slim');
 $app->addRoutingMiddleware();
 $app->addErrorMiddleware(true, true, true);
-$app->add( function ($request, $handler) {
-    $response = $handler->handle($request);
+$app->addBodyParsingMiddleware(); 
 
+
+$app->options('/{routes:.+}', function (Request $request, Response $response) {
+    return $response;
+});
+$app->add(function (Request $request, $handler) {
+    $response = $handler->handle($request);
     return $response
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE')
-        ->withHeader('Content-Type', 'application/json')
-    ;
+        ->withHeader('Content-Type', 'application/json');
 });
 
 
-$app->post('/login', function (Request $request, Response $response){
-    $data = $request->getParsedBody();
+$auth  = new \AuthMiddleware($app->getResponseFactory());
+$admin = new \AdminMiddleware($app->getResponseFactory());
+
+$app->get('/', function ($req, $res) {
+    $res->getBody()->write(json_encode(['ok' => true]));
+    return $res->withHeader('Content-Type', 'application/json');
+});
+
+
+
+/* ================== AUTH ================== */
+$app->post('/login', function (Request $request, Response $response) {
+    $data = $request->getParsedBody() ?: [];
     $email = $data['email'] ?? '';
     $password = $data['password'] ?? '';
     $usr = new user();
 
-    $result = $usr->login($email,$password);
-    $response->getBody()->write(json_encode([
-        'status'=>$result['status'],
-        'message'=>$result['message']
-    ]));
+    $result = $usr->login($email, $password);
+
     
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
     return $response
-        ->withStatus($result['status'])
-        ->withHeader('Content-Type', 'aplication/json');
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
 });
 
-$app->post('/logout', function (Request $request, Response $response){
-    $data = $request->getParsedBody();
-    $id = $data['id'] ?? '';
+
+$app->post('/logout', function (Request $request, Response $response) {
+    $user = $request->getAttribute('user'); 
+    if (!$user) {
+        $response->getBody()->write(json_encode(['error' => 'No autenticado']));
+        return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+    }
+
     $usr = new user();
+    $result = $usr->logout((int)$user['id']);
 
-    $result = $usr->logout($id);
     $response->getBody()->write(json_encode([
-        'status'=>$result['status'],
-        'message'=>$result['message']
+        'status'  => $result['status'],
+        'message' => $result['message']
     ]));
-    
     return $response
-        ->withStatus($result['status'])
-        ->withHeader('Content-Type', 'aplication/json');
-});
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($auth);
 
+/* ================ USUARIOS ==================== */
 $app->patch('/user/{id}', function (Request $request, Response $response, array $args) {
-    $id = $args['id'];
-    $data = $request->getParsedBody();
+    $id = (int)$args['id'];
+    $data = $request->getParsedBody() ?: [];
 
-    $currentId = $data['currentId'] ?? null;
-
-    $nombre = $data['first_name'] ?? null;
-    $apellido = $data['last_name'] ?? null;
-    $password = $data['password'] ?? null;
+    $nombre   = $data['first_name'] ?? null;
+    $apellido = $data['last_name']  ?? null;
+    $password = $data['password']   ?? null;
 
     $usr = new user();
     $result = $usr->editarUsuario($id, $nombre, $apellido, $password);
 
     $response->getBody()->write(json_encode([
-        'status' => $result['status'],
+        'status'  => $result['status'],
         'message' => $result['message']
     ]));
-
     return $response
-        ->withStatus($result['status'])
+        ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
 
 $app->delete('/user/{id}', function (Request $request, Response $response, array $args) {
-    $id = $args['id'];
-    $data = $request->getParsedBody();
-
+    $id = (int)$args['id'];
+    $data = $request->getParsedBody() ?: [];
     $currentId = $data['currentId'] ?? null;
 
     $usr = new user();
     $result = $usr->deleteUser($id, $currentId);
 
     $response->getBody()->write(json_encode([
-        'status' => $result['status'],
+        'status'  => $result['status'],
         'message' => $result['message']
     ]));
-
     return $response
-        ->withStatus($result['status'])
+        ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
 
 $app->get('/user/{id}', function (Request $request, Response $response, array $args) {
-    $id = $args['id'];
-    $data = $request->getQueryParams();
-
-    $currentId = $data['currentId'] ?? null;
+    $id = (int)$args['id'];
+    $params = $request->getQueryParams();
+    $currentId = $params['currentId'] ?? null;
 
     $usr = new user();
     $result = $usr->getUserById($id, $currentId);
 
     $response->getBody()->write(json_encode([
-        'status' => $result['status'],
+        'status'  => $result['status'],
         'message' => $result['message']
     ]));
-
     return $response
-        ->withStatus($result['status'])
+        ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
 
@@ -125,14 +145,186 @@ $app->get('/users', function (Request $request, Response $response) {
     $result = $usr->getAllUsers($search);
 
     $response->getBody()->write(json_encode([
-        'status' => $result['status'],
+        'status'  => $result['status'],
         'message' => $result['message']
     ]));
-
     return $response
-        ->withStatus($result['status'])
+        ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
+
+/* ================ CANCHAS =================== */
+
+$app->post('/court', function (Request $request, Response $response) {
+    $data = $request->getParsedBody() ?: [];
+
+    if (isset($data['id']) || isset($data['user_id'])) {
+        $response->getBody()->write(json_encode(['error' => 'No envíes id/user_id en la creación']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    $name = trim($data['name'] ?? '');
+    $desc = $data['description'] ?? null;
+
+    if ($name === '' || mb_strlen($name) > 100) {
+        $response->getBody()->write(json_encode(['error' => 'name es requerido (≤100 chars)']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    $court = new Court();
+    $result = $court->crearCancha($name, $desc);
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($admin)->add($auth);
+
+
+$app->put('/court/{id}', function (Request $request, Response $response, array $args) {
+    $id   = (int)$args['id'];
+    $data = $request->getParsedBody() ?: [];
+
+    $name = array_key_exists('name', $data) ? trim((string)$data['name']) : null;
+    $desc = array_key_exists('description', $data) ? $data['description'] : null;
+
+    if ($name !== null && mb_strlen($name) > 100) {
+        $response->getBody()->write(json_encode(['error' => 'name ≤ 100 chars']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    $court = new Court();
+    
+    $result = $court->actualizarCancha($id, $name, $desc);
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($admin)->add($auth);
+
+$app->get('/court/{id}', function (Request $request, Response $response, array $args) {
+    $id   = (int)$args['id'];
+
+    $court = new Court();
+    
+    $result = $court->getInfoCancha($id);
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+
+$app->delete('/court/{id}', function (Request $request, Response $response, array $args) {
+    $id    = (int)$args['id'];
+    $court = new Court();
+
+    $result = $court->eliminarCancha($id);
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($admin)->add($auth);
+
+/* ================ RESERVAS =================== */
+$app->post('/reserva', function (Request $solicitud, Response $respuesta) {
+    $usuario = $solicitud->getAttribute('user');
+
+    $datos = $solicitud->getParsedBody() ?: [];
+
+    $creadorId  = (int)$usuario['id'];
+    $canchaId   = (int)($datos['cancha_id'] ?? 0);
+    $inicio     = trim((string)($datos['fecha_hora'] ?? ''));
+    $bloques    = (int)($datos['bloques'] ?? 0);
+    $companeros = is_array($datos['companeros'] ?? null) ? $datos['companeros'] : [];
+
+    $reserva   = new Reserva();
+    $resultado = $reserva->crearReserva($creadorId, $canchaId, $inicio, $bloques, $companeros);
+
+    $respuesta->getBody()->write(json_encode([
+        'status'  => $resultado['status'],
+        'message' => $resultado['message']
+    ]));
+    return $respuesta
+        ->withStatus((int)$resultado['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($auth);
+
+
+$app->get('/booking', function (Request $solicitud, Response $respuesta) {
+    $params = $solicitud->getQueryParams();
+    $fecha  = trim((string)($params['date'] ?? ''));
+
+    $reserva   = new Reserva();
+    $resultado = $reserva->listarReservasPorDia($fecha);
+
+    $respuesta->getBody()->write(json_encode([
+        'status'  => $resultado['status'],
+        'message' => $resultado['message']
+    ]));
+    return $respuesta
+        ->withStatus((int)$resultado['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+
+
+
+$app->delete('/booking/{id}', function (Request $solicitud, Response $respuesta, array $args) {
+    $usuario   = $solicitud->getAttribute('user');
+    $bookingId = (int)$args['id'];
+
+    $reserva   = new Reserva();
+    $resultado = $reserva->eliminarReserva($bookingId, (int)$usuario['id'], (int)$usuario['is_admin']);
+
+    $respuesta->getBody()->write(json_encode([
+        'status'  => $resultado['status'],
+        'message' => $resultado['message']
+    ]));
+    return $respuesta
+        ->withStatus((int)$resultado['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($auth);
+
+
+
+
+
+/* ================ PARTICIPANTES =================== */
+
+$app->put('/booking_participant/{id}', function (Request $solicitud, Response $respuesta, array $args) {
+    $usuario = $solicitud->getAttribute('user');
+    $reservaId = (int)$args['id'];
+    $datos = $solicitud->getParsedBody() ?: [];
+
+    $nuevosParticipantes = is_array($datos['companeros'] ?? null) ? $datos['companeros'] : [];
+
+    $reserva = new Reserva();
+    $resultado = $reserva->modificarParticipantes($reservaId, (int)$usuario['id'], $nuevosParticipantes);
+
+    $respuesta->getBody()->write(json_encode([
+        'status'  => $resultado['status'],
+        'message' => $resultado['message']
+    ]));
+    return $respuesta
+        ->withStatus((int)$resultado['status'])
+        ->withHeader('Content-Type', 'application/json');
+})->add($auth);
 
 
 
