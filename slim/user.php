@@ -1,5 +1,6 @@
 <?php
     Require_once __DIR__ . '/Conexion.php';
+    date_default_timezone_set('America/Argentina/Buenos_Aires'); // Cambia a tu zona horaria
     class user{
         public function login($email, $password):array{
             $db = (new Conexion())->getDb(); //conecto la base de datos
@@ -48,7 +49,7 @@
 
                 $token = bin2hex(random_bytes(32)); // 64 caracteres hexadecimales
 
-                $expired = date("Y-m-d H:i:s", strtotime("+5 minutes")); //ponemos que expire en 5 minutos
+                $expired = date("Y-m-d H:i:s", strtotime("+5 minutes")); // Establece que expire en 5 minutos
 
                 $query = "UPDATE users SET token = :token, expired = :expired WHERE id = :id";
                 $stmt = $db->prepare($query);
@@ -74,11 +75,9 @@
 
             $stmt->bindParam(':id', $id);
 
-            $stmt->execute();
+            $result = $stmt->execute();
 
-            $result= $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if($result && isset($result['id'])){
+            if($result && $stmt->rowCount() > 0){
                 return[
                     'status'=> 200,
                     'message'=> "Se cerro la sesion correctamente"
@@ -91,7 +90,13 @@
             ];
         }
 
-        public function createUser($email, $password, $firs_name, $last_name):array{
+        public function createUser($email, $password, $first_name, $last_name):array{
+            if (strpos($email, '@') === false) {
+                return [
+                    'status' => 400,
+                    'message' => "El email debe contener el carácter '@'"
+                ];
+            }
             if(!$this->verificarExistenciaUser($email)){
                 return[
                     'status'=> 409,
@@ -138,40 +143,45 @@
             $stmt->bindParam(':first_name', $first_name);
             $stmt->bindParam(':last_name', $last_name);
 
-            $stmt->execute();
+            $result = $stmt->execute();
 
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if($result){
+            if($result && $stmt->rowCount() > 0){
                 return[
                     'status'=> 200,
                     'message'=> "Usuario creado correctamente"
                 ];
+            } else {
+                return [
+                    'status'=> 404,
+                    'message'=> "Error al crear el usuario"
+                ];
             }
-
-            return [
-                'status'=> 404,
-                'message'=> "Error al crear el usuario"
-            ];
         }
 
         public function editarUsuario($id, $nombre = null, $apellido = null, $password = null): array {
-
             $email = $this->getEmailById($id);
 
-            if(!$email){
+            if (!$email) {
                 return [
-                    'status'=> 404,
-                    'message'=> "El usuario no existe"
+                    'status' => 404,
+                    'message' => "El usuario no existe"
                 ];
             }
 
-            if(!$this->esElMismoUsuario($id,$email) && !$this->esAdmin($id)){
+            if (!$this->esElMismoUsuario($id, $email) && !$this->esAdmin($id)) {
                 return [
-                    'status'=> 401,
-                    'message'=> "No tiene permisos para modificar este usuario"
+                    'status' => 401,
+                    'message' => "No tiene permisos para modificar este usuario"
                 ];
             }
+
+            if (!$this->isLoggedIn($id)) {
+                return [
+                    'status' => 403,
+                    'message' => "No estás logueado o tu sesión ha expirado"
+                ];
+            }
+
             $db = (new Conexion())->getDb();
             $camposActualizar = [];
             $valores = [];
@@ -185,28 +195,28 @@
                 $valores[':last_name'] = $apellido;
             }
             if ($password !== null) {
-                if(strlen($password) < 8){
+                if (strlen($password) < 8) {
                     return [
-                        'status'=> 404,
-                        'message'=> "La contraseña debe tener al menos 8 caracteres"
+                        'status' => 404,
+                        'message' => "La contraseña debe tener al menos 8 caracteres"
                     ];
                 }
-                if(!preg_match('/[A-Z]/', $password)){
+                if (!preg_match('/[A-Z]/', $password)) {
                     return [
-                        'status'=> 404,
-                        'message'=> "La contraseña debe tener al menos una letra mayúscula"
+                        'status' => 404,
+                        'message' => "La contraseña debe tener al menos una letra mayúscula"
                     ];
                 }
-                if(!preg_match('/[0-9]/', $password)){
+                if (!preg_match('/[0-9]/', $password)) {
                     return [
-                        'status'=> 404,
-                        'message'=> "La contraseña debe tener al menos un número"
+                        'status' => 404,
+                        'message' => "La contraseña debe tener al menos un número"
                     ];
                 }
-                if(!preg_match('/[^a-zA-Z0-9]/', $password)){
+                if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
                     return [
-                        'status'=> 404,
-                        'message'=> "La contraseña debe tener al menos un caracter especial"
+                        'status' => 404,
+                        'message' => "La contraseña debe tener al menos un carácter especial"
                     ];  
                 }
                 $camposActualizar[] = "password = :password";
@@ -223,25 +233,54 @@
             $query = "UPDATE users SET " . implode(', ', $camposActualizar) . " WHERE id = :id";
             $valores[':id'] = $id;
 
-            $stmt = $db->prepare($query);
-            $resultado = $stmt->execute($valores);
+            try {
+                $stmt = $db->prepare($query);
+                $resultado = $stmt->execute($valores);
 
-            if ($resultado && $stmt->rowCount() > 0) { //rowCount devuelve la cantidad de filas afectadas por la ultima sentencia SQL
-                return [
-                    'status' => 200,
-                    'message' => 'Usuario actualizado correctamente'
-                ];
-            } else {
+                if ($resultado) {
+                    if ($stmt->rowCount() > 0) {
+                        return [
+                            'status' => 200,
+                            'message' => 'Usuario actualizado correctamente'
+                        ];
+                    } else {
+                        return [
+                            'status' => 204,
+                            'message' => 'No hubo cambios en la actualización'
+                        ];
+                    }
+                } else {
+                    return [
+                        'status' => 404,
+                        'message' => 'No se pudo actualizar el usuario'
+                    ];
+                }
+            } catch (\Exception $e) {
                 return [
                     'status' => 404,
-                    'message' => 'No se pudo actualizar el usuario o no hubo cambios'
+                    'message' => 'Error en la actualización: ' . $e->getMessage()
                 ];
             }
         }
 
         public function deleteUser($id, $currentId): array {
 
-            if($id !== $currentId && !$this->esAdmin($currentId)){
+            $email = $this->getEmailById($id); 
+            if (!$email) { 
+                return [
+                    'status' => 404,
+                    'message' => "El usuario no existe"
+                ];
+            }
+
+            if ($this->esAdmin($id)){
+                return [
+                    'status'=> 401,
+                    'message'=> "No tiene permisos para eliminar este usuario"
+                ];
+            }
+
+            if($id != $currentId && !$this->esAdmin($currentId)){
                 return [
                     'status'=> 401,
                     'message'=> "No tiene permisos para eliminar este usuario"
@@ -274,7 +313,7 @@
 
             return [
                 'status'=> 404,
-                'message'=> "No se pudo eliminar el usuario o no existe"
+                'message'=> "No se pudo eliminar el usuario"
             ];
         }
 
@@ -321,8 +360,9 @@
 
             if($result && isset($result['email'])){
                 return $result['email'];
+            }else{
+                return null;
             }
-            return null;
         }
 
         private function esElMismoUsuario($id,$email):bool{
@@ -338,7 +378,9 @@
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if($result && isset($result['id']) && $result['id'] === $id){
+            error_log("Resultado de esElMismoUsuario: " . json_encode($result)); // Log de depuración
+
+            if($result && isset($result['id']) && $result['id'] == $id){
                 return true;
             }
             return false;         
@@ -383,26 +425,43 @@
 
         }
 
-        public function getUserById($id,$currentId): array {
+        public function getUserById($id, $currentId): array {
+            $email = $this->getEmailById($id);
 
-            if(!$this->esElMismoUsuario($id,$currentId) && !$this->esAdmin($currentId)){
+            if (!$email) {
                 return [
-                    'status' => 403,
-                    'message' => "No tienes permiso para acceder a esta información"
+                    'status' => 404,
+                    'message' => "El usuario no existe"
                 ];
             }
+
+            if (!$this->isLoggedIn($currentId)) {
+                return [
+                    'status' => 403,
+                    'message' => "No estás logueado o tu sesión ha expirado"
+                ];
+            }
+
+            if(!$this->esAdmin($currentId)){
+                if(!$this->esElMismoUsuario($currentId, $email)){
+                    return [
+                        'status' => 403,
+                        'message' => "No tienes permiso para acceder a esta información"
+                    ];
+                }
+            }
+
 
             $db = (new Conexion())->getDb();
 
             $query = "SELECT email, first_name, last_name, is_admin FROM users WHERE id = :id";
 
             $stmt = $db->prepare($query);
-
             $stmt->bindParam(':id', $id);
-
             $stmt->execute();
 
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("Resultado de la consulta: " . json_encode($result)); // Log de depuración
 
             if ($result) {
                 return [
@@ -420,7 +479,7 @@
         public function getAllUsers($search = ''): array {  
             $db = (new Conexion())->getDb();
 
-            if ($search !== '') {
+            if ($search != '') {
                 $search = "%$search%";
                 $query = "SELECT email, first_name, last_name, is_admin FROM users WHERE is_admin = 0 AND (email LIKE :search OR first_name LIKE :search OR last_name LIKE :search)";
                 $stmt = $db->prepare($query);
@@ -447,7 +506,24 @@
         }
 
         
+        public function isLoggedIn($id): bool {
+            $db = (new Conexion())->getDb();
 
+            // Consulta para verificar el token y su expiración
+            $query = "SELECT id FROM users WHERE id = :id AND expired > NOW()";
+            $stmt = $db->prepare($query);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($result) {
+                return true; // El token es válido y no ha expirado
+            } else {
+                return false; // No estás logueado o el token ha expirado
+            }
+
+        }
 
 
         

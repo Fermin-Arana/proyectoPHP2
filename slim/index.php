@@ -62,6 +62,8 @@ $app->post('/login', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 });
 
+//funca
+
 
 $app->post('/logout', function (Request $request, Response $response) {
     $user = $request->getAttribute('user'); 
@@ -82,7 +84,32 @@ $app->post('/logout', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 })->add($auth);
 
+ //funca
+
 /* ================ USUARIOS ==================== */
+$app->post('/user', function (Request $request, Response $response) {
+    $data = $request->getParsedBody() ?: [];
+    
+    $email = $data['email'] ?? '';
+    $password = $data['password'] ?? '';
+    $firstName = $data['first_name'] ?? '';
+    $lastName = $data['last_name'] ?? '';
+
+    $usr = new user();
+    $result = $usr->createUser($email, $password, $firstName, $lastName);
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
+//funca
+
+
 $app->patch('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
     $data = $request->getParsedBody() ?: [];
@@ -103,6 +130,8 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
         ->withHeader('Content-Type', 'application/json');
 });
 
+//funca
+
 $app->delete('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
     $data = $request->getParsedBody() ?: [];
@@ -119,11 +148,14 @@ $app->delete('/user/{id}', function (Request $request, Response $response, array
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
+//funca pero falta probar con reservas
 
 $app->get('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
-    $params = $request->getQueryParams();
-    $currentId = $params['currentId'] ?? null;
+
+    // Obtener el cuerpo de la solicitud
+    $body = $request->getParsedBody();
+    $currentId = (int)($body['currentId'] ?? null); // Obtener currentId del cuerpo de la solicitud
 
     $usr = new user();
     $result = $usr->getUserById($id, $currentId);
@@ -136,6 +168,8 @@ $app->get('/user/{id}', function (Request $request, Response $response, array $a
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
+
+//funca
 
 $app->get('/users', function (Request $request, Response $response) {
     $params = $request->getQueryParams();
@@ -152,6 +186,8 @@ $app->get('/users', function (Request $request, Response $response) {
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 });
+
+//funca
 
 /* ================ CANCHAS =================== */
 
