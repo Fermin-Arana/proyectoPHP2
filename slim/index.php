@@ -9,6 +9,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/Conexion.php';
 require_once __DIR__ . '/user.php';
 require_once __DIR__ . '/Court.php';
+require_once __DIR__ . '/Reserva.php';
 require_once __DIR__ . '/AuthMiddleware.php';
 require_once __DIR__ . '/AdminMiddleware.php';
 
@@ -278,26 +279,40 @@ $app->delete('/court/{id}', function (Request $request, Response $response, arra
 })->add($admin)->add($auth);
 
 /* ================ RESERVAS =================== */
-$app->post('/reserva', function (Request $solicitud, Response $respuesta) {
-    $usuario = $solicitud->getAttribute('user');
+$app->post('/booking', function (Request $request, Response $response) {
+    $user = $request->getAttribute('user'); 
+    if (!$user) {
+        $response->getBody()->write(json_encode(['error' => 'No autenticado']));
+        return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+    }
 
-    $datos = $solicitud->getParsedBody() ?: [];
+    $data = $request->getParsedBody() ?: [];
+    
+    $cancha_id = (int)($data['court_id'] ?? 0);
+    $fecha_inicio = $data['booking_datetime'] ?? '';
+    $duracion_bloques = (int)($data['duration_blocks'] ?? 0);
+    $participantes = $data['participants'] ?? [];
 
-    $creadorId  = (int)$usuario['id'];
-    $canchaId   = (int)($datos['cancha_id'] ?? 0);
-    $inicio     = trim((string)($datos['fecha_hora'] ?? ''));
-    $bloques    = (int)($datos['bloques'] ?? 0);
-    $companeros = is_array($datos['companeros'] ?? null) ? $datos['companeros'] : [];
+    // Convertir a array de enteros si viene como array
+    if (is_array($participantes)) {
+        for ($i = 0; $i < count($participantes); $i++) {
+            $participantes[$i] = (int)$participantes[$i];
+        }
+    } else {
+        $participantes = [];
+    }
 
-    $reserva   = new Reserva();
-    $resultado = $reserva->crearReserva($creadorId, $canchaId, $inicio, $bloques, $companeros);
+    $usuario_creador = (int)$user['id'];
 
-    $respuesta->getBody()->write(json_encode([
-        'status'  => $resultado['status'],
-        'message' => $resultado['message']
+    $reserva = new Reserva();
+    $result = $reserva->crearReserva($cancha_id, $usuario_creador, $fecha_inicio, $duracion_bloques, $participantes);
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
     ]));
-    return $respuesta
-        ->withStatus((int)$resultado['status'])
+    return $response
+        ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 })->add($auth);
 
