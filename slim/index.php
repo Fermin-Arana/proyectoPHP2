@@ -63,7 +63,7 @@ $app->post('/login', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 });
 
-//funca
+
 
 
 $app->post('/logout', function (Request $request, Response $response) {
@@ -85,7 +85,7 @@ $app->post('/logout', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 })->add($auth);
 
- //funca
+
 
 /* ================ USUARIOS ==================== */
 $app->post('/user', function (Request $request, Response $response) {
@@ -108,7 +108,7 @@ $app->post('/user', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 });
 
-//funca
+
 
 
 $app->patch('/user/{id}', function (Request $request, Response $response, array $args) {
@@ -131,14 +131,20 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
         ->withHeader('Content-Type', 'application/json');
 });
 
-//funca
+
 
 $app->delete('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
-    $data = $request->getParsedBody() ?: [];
-    $currentId = $data['currentId'] ?? null;
 
-    $usr = new user();
+    $current = $request->getAttribute('user'); 
+    if (!$current || !isset($current['id'])) {
+        $response->getBody()->write(json_encode(['status' => 401, 'message' => 'No autenticado']));
+        return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+    }
+
+    $currentId = (int)$current['id'];
+
+    $usr = new user(); 
     $result = $usr->deleteUser($id, $currentId);
 
     $response->getBody()->write(json_encode([
@@ -148,15 +154,16 @@ $app->delete('/user/{id}', function (Request $request, Response $response, array
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-});
-//funca pero falta probar con reservas
+})->add($auth);
+
+
 
 $app->get('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
 
-    // Obtener el cuerpo de la solicitud
+    
     $body = $request->getParsedBody();
-    $currentId = (int)($body['currentId'] ?? null); // Obtener currentId del cuerpo de la solicitud
+    $currentId = (int)($body['currentId'] ?? null); 
 
     $usr = new user();
     $result = $usr->getUserById($id, $currentId);
@@ -170,7 +177,7 @@ $app->get('/user/{id}', function (Request $request, Response $response, array $a
         ->withHeader('Content-Type', 'application/json');
 });
 
-//funca
+
 
 $app->get('/users', function (Request $request, Response $response) {
     $params = $request->getQueryParams();
@@ -293,7 +300,7 @@ $app->post('/booking', function (Request $request, Response $response) {
     $duracion_bloques = (int)($data['duration_blocks'] ?? 0);
     $participantes = $data['participants'] ?? [];
 
-    // Convertir a array de enteros si viene como array
+    
     if (is_array($participantes)) {
         for ($i = 0; $i < count($participantes); $i++) {
             $participantes[$i] = (int)$participantes[$i];
@@ -356,7 +363,6 @@ $app->delete('/booking/{id}', function (Request $solicitud, Response $respuesta,
 
 
 
-/* ================ PARTICIPANTES =================== */
 
 $app->put('/booking_participant/{id}', function (Request $solicitud, Response $respuesta, array $args) {
     $usuario = $solicitud->getAttribute('user');

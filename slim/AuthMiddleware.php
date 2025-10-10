@@ -31,11 +31,18 @@ class AuthMiddleware
                 return $this->json(401, ['error' => 'Token inválido o vencido']);
             }
 
-            
+            // Normalización de tipos (id e is_admin a int)
+            $user = [
+                'id'       => (int)$user['id'],
+                'email'    => $user['email'],
+                'is_admin' => (int)$user['is_admin'],
+            ];
+
+            // Renovar vencimiento (keep-alive de sesión)
             $db->prepare("UPDATE users SET expired = DATE_ADD(NOW(), INTERVAL 5 MINUTE) WHERE id = :id")
                ->execute([':id' => $user['id']]);
 
-          
+            // Inyectar user normalizado en el request
             $request = $request->withAttribute('user', $user);
 
             return $handler->handle($request);

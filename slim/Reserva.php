@@ -57,10 +57,10 @@
         $db = (new Conexion())->getDb();
 
         $minutos_totales = $duracion_bloques * 30;
-        $horas_a_sumar = intval($minutos_totales / 60); //convierte texto a integer
+        $horas_a_sumar = intval($minutos_totales / 60); 
         $minutos_a_sumar = $minutos_totales % 60;
         
-        $fecha_partes = explode(' ', $fecha_inicio); //separa fecha y hora
+        $fecha_partes = explode(' ', $fecha_inicio); 
         $fecha = $fecha_partes[0];
         $hora_partes = explode(':', $fecha_partes[1]);
         $hora = intval($hora_partes[0]);
@@ -92,7 +92,7 @@
             $inicio_existente = $reservas[$i]['booking_datetime'];
             $bloques_existente = $reservas[$i]['duration_blocks'];
             
-            // Calcular fin de reserva existente
+            
             $minutos_existente = $bloques_existente * 30;
             $horas_existente = intval($minutos_existente / 60);
             $minutos_resto = $minutos_existente % 60;
@@ -251,7 +251,7 @@
             $participantes[] = $usuario_creador;
         }
         
-        // Validar que sea single (2 personas) o dobles (4 personas)
+       
         if (count($participantes) < 2 || count($participantes) > 4) {
             return [
                 'status' => 409,
@@ -259,7 +259,7 @@
             ];
         }
         
-        // Validar todas las condiciones
+        
         $validacion = $this->validarNuevaReserva($cancha_id, $fecha_inicio, $duracion_bloques, $participantes);
         if ($validacion['status'] !== 200) {
             return $validacion;
@@ -267,7 +267,7 @@
         
         $db = (new Conexion())->getDb();
         
-        // Crear la reserva
+     
         $query = "INSERT INTO bookings (court_id, created_by, booking_datetime, duration_blocks) VALUES (:court_id, :created_by, :booking_datetime, :duration_blocks)";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':court_id', $cancha_id);
@@ -286,7 +286,7 @@
         
         $booking_id = $db->lastInsertId();
         
-        // Agregar participantes
+        
         $query2 = "INSERT INTO booking_participants (booking_id, user_id) VALUES (:booking_id, :user_id)";
         $stmt2 = $db->prepare($query2);
         
@@ -303,4 +303,156 @@
             'booking_id' => $booking_id
         ];
     }
+
+   public function modificarParticipantes(int $id_reserva, int $id_usuario_actual, array $companeros_nuevos): array
+{
+    $companeros_nuevos = array_values(array_unique(array_map('intval', $companeros_nuevos)));
+
+    try {
+        $bd = (new Conexion())->getDb();
+
+        $sql_reserva = "
+            SELECT id, court_id, created_by, booking_datetime, duration_blocks
+            FROM bookings
+            WHERE id = :id_reserva
+            LIMIT 1
+        ";
+        $stmt_reserva = $bd->prepare($sql_reserva);
+        $stmt_reserva->execute([':id_reserva' => $id_reserva]);
+        $reserva = $stmt_reserva->fetch(PDO::FETCH_ASSOC);
+
+        if (!$reserva) {
+            return ['status' => 404, 'message' => 'Reserva no encontrada'];
+        }
+
+        $id_creador  = (int)$reserva['created_by'];
+        $fecha_desde = $reserva['booking_datetime'];
+        $minutos     = ((int)$reserva['duration_blocks']) * 30;
+        $fecha_hasta = date('Y-m-d H:i:s', strtotime($fecha_desde . " + {$minutos} minutes"));
+
+        if ($id_creador !== (int)$id_usuario_actual) {
+            return ['status' => 403, 'message' => 'Solo el creador puede modificar los participantes'];
+        }
+
+        $companeros_nuevos = array_filter($companeros_nuevos, fn($id_u) => $id_u !== $id_creador);
+
+        if (count($companeros_nuevos) > 3) {
+            return ['status' => 400, 'message' => 'Máximo 3 compañeros'];
+        }
+
+        if (!empty($companeros_nuevos)) {
+            $placeholders = implode(',', array_fill(0, count($companeros_nuevos), '?'));
+            $sql_existencia = "SELECT id FROM users WHERE id IN ($placeholders)";
+            $stmt_existencia = $bd->prepare($sql_existencia);
+            $stmt_existencia->execute($companeros_nuevos);
+            $ids_encontrados = array_map('intval', array_column($stmt_existencia->fetchAll(PDO::FETCH_ASSOC), 'id'));
+            $ids_faltantes = array_values(array_diff($companeros_nuevos, $ids_encontrados));
+            if (!empty($ids_faltantes)) {
+                return ['status' => 400, 'message' => 'IDs de compañeros inexistentes: ' . implode(',', $ids_faltantes)];
+            }
+        }
+
+        $sql_colision_creador = "
+            SELECT 1
+            FROM bookings b
+            WHERE b.id <> :id_reserva
+              AND b.created_by = :id_usuario
+              AND b.booking_datetime < :fecha_hasta
+              AND DATE_ADD(b.booking_datetime, INTERVAL b.duration_blocks*30 MINUTE) > :fecha_desde
+            LIMIT 1
+        ";
+
+        $sql_colision_participante = "
+            SELECT 1
+            FROM bookings b
+            JOIN booking_participants bp ON bp.booking_id = b.id
+            WHERE b.id <> :id_reserva
+              AND bp.user_id = :id_usuario
+              AND b.booking_datetime < :fecha_hasta
+              AND DATE_ADD(b.booking_datetime, INTERVAL b.duration_blocks*30 MINUTE) > :fecha_desde
+            LIMIT 1
+        ";
+
+        $stmt_colision_creador = $bd->prepare($sql_colision_creador);
+        $stmt_colision_participante = $bd->prepare($sql_colision_participante);
+
+        foreach ($companeros_nuevos as $id_usuario_companero) {
+            $stmt_colision_creador->execute([
+                ':id_reserva'  => $id_reserva,
+                ':id_usuario'  => $id_usuario_companero,
+                ':fecha_desde' => $fecha_desde,
+                ':fecha_hasta' => $fecha_hasta,
+            ]);
+            if ($stmt_colision_creador->fetchColumn()) {
+                return ['status' => 409, 'message' => "El usuario {$id_usuario_companero} tiene una reserva solapada (como creador)"];
+            }
+
+            $stmt_colision_participante->execute([
+                ':id_reserva'  => $id_reserva,
+                ':id_usuario'  => $id_usuario_companero,
+                ':fecha_desde' => $fecha_desde,
+                ':fecha_hasta' => $fecha_hasta,
+            ]);
+            if ($stmt_colision_participante->fetchColumn()) {
+                return ['status' => 409, 'message' => "El usuario {$id_usuario_companero} tiene una reserva solapada (como participante)"];
+            }
+        }
+
+        $bd->beginTransaction();
+
+        $sql_borrar = "
+            DELETE FROM booking_participants
+            WHERE booking_id = :id_reserva
+              AND user_id <> :id_creador
+        ";
+        $stmt_borrar = $bd->prepare($sql_borrar);
+        $stmt_borrar->execute([
+            ':id_reserva' => $id_reserva,
+            ':id_creador' => $id_creador
+        ]);
+
+        if (!empty($companeros_nuevos)) {
+            $sql_insertar = "
+                INSERT INTO booking_participants (booking_id, user_id)
+                VALUES (:id_reserva, :id_usuario)
+            ";
+            $stmt_insertar = $bd->prepare($sql_insertar);
+
+            foreach ($companeros_nuevos as $id_usuario_companero) {
+                if ($id_usuario_companero === $id_creador) { continue; }
+                $sql_existe = "
+                    SELECT 1 FROM booking_participants
+                    WHERE booking_id = :id_reserva AND user_id = :id_usuario
+                    LIMIT 1
+                ";
+                $stmt_existe = $bd->prepare($sql_existe);
+                $stmt_existe->execute([
+                    ':id_reserva' => $id_reserva,
+                    ':id_usuario' => $id_usuario_companero
+                ]);
+                if ($stmt_existe->fetchColumn()) {
+                    continue;
+                }
+                $stmt_insertar->execute([
+                    ':id_reserva' => $id_reserva,
+                    ':id_usuario' => $id_usuario_companero
+                ]);
+            }
+        }
+
+        $bd->commit();
+
+        return ['status' => 200, 'message' => 'Participantes actualizados correctamente'];
+
+    } catch (Throwable $e) {
+        if (isset($bd) && $bd->inTransaction()) {
+            $bd->rollBack();
+        }
+        return ['status' => 500, 'message' => 'Error al modificar participantes: ' . $e->getMessage()];
+    }
+}
+
+
+
+
 }

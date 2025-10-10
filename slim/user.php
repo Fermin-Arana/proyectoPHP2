@@ -282,8 +282,8 @@
 
             if($id != $currentId && !$this->esAdmin($currentId)){
                 return [
-                    'status'=> 401,
-                    'message'=> "No tiene permisos para eliminar este usuario"
+                    'status'=> 403,
+                    'message'=> "Solo el propio usuario o un administrador puede eliminar"
                 ];
             }
 
@@ -386,24 +386,14 @@
             return false;         
         }
 
-        private function esAdmin($id):bool{
-            $db = (new Conexion())->getDb();
-
-            $query = "SELECT is_admin FROM users WHERE id = :id";
-
-            $stmt = $db->prepare($query);
-
-            $stmt->bindParam(':id', $id);
-
-            $stmt->execute();
-
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if($result && isset($result['is_admin']) && $result['is_admin'] === 1){
-                return true;
-            }
-            return false;
-        }
+       private function esAdmin($id): bool {
+        $db = (new Conexion())->getDb();
+        $stmt = $db->prepare("SELECT is_admin FROM users WHERE id = :id");
+        $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+        $stmt->execute();
+        $val = $stmt->fetchColumn();
+        return (int)$val === 1;
+       }
 
         private function verificarExistenciaUser($email):bool{
             $db = (new Conexion())->getDb();
@@ -518,14 +508,14 @@
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result) {
-                return true; // El token es válido y no ha expirado
+                return true; 
             } else {
-                return false; // No estás logueado o el token ha expirado
+                return false; 
             }
 
         }
 
-
+        
         
 
     }
