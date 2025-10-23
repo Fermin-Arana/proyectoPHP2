@@ -115,12 +115,26 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
     $id = (int)$args['id'];
     $data = $request->getParsedBody() ?: [];
 
+    // Obtener el usuario logueado desde el middleware de autenticación
+    $currentUser = $request->getAttribute('user');
+    if (!$currentUser || !isset($currentUser['id'])) {
+        $response->getBody()->write(json_encode([
+            'status' => 401,
+            'message' => 'Usuario no autenticado'
+        ]));
+        return $response
+            ->withStatus(401)
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    $currentId = (int)$currentUser['id'];
+
     $nombre   = $data['first_name'] ?? null;
     $apellido = $data['last_name']  ?? null;
     $password = $data['password']   ?? null;
 
     $usr = new user();
-    $result = $usr->editarUsuario($id, $nombre, $apellido, $password);
+    $result = $usr->editarUsuario($id, $currentId, $nombre, $apellido, $password);
 
     $response->getBody()->write(json_encode([
         'status'  => $result['status'],
@@ -129,7 +143,7 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-});
+})->add($auth);
 
 
 
@@ -161,9 +175,19 @@ $app->delete('/user/{id}', function (Request $request, Response $response, array
 $app->get('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
 
-    
-    $body = $request->getParsedBody();
-    $currentId = (int)($body['currentId'] ?? null); 
+    // Obtener el usuario logueado desde el middleware de autenticación
+    $currentUser = $request->getAttribute('user');
+    if (!$currentUser || !isset($currentUser['id'])) {
+        $response->getBody()->write(json_encode([
+            'status' => 401,
+            'message' => 'Usuario no autenticado'
+        ]));
+        return $response
+            ->withStatus(401)
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    $currentId = (int)$currentUser['id'];
 
     $usr = new user();
     $result = $usr->getUserById($id, $currentId);
@@ -175,7 +199,7 @@ $app->get('/user/{id}', function (Request $request, Response $response, array $a
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-});
+})->add($auth);
 
 
 

@@ -158,9 +158,9 @@
             }
         }
 
-        public function editarUsuario($id, $nombre = null, $apellido = null, $password = null): array {
+        public function editarUsuario($id, $currentId, $nombre = null, $apellido = null, $password = null): array {
+            // Verificar que el usuario a modificar existe
             $email = $this->getEmailById($id);
-
             if (!$email) {
                 return [
                     'status' => 404,
@@ -168,17 +168,11 @@
                 ];
             }
 
-            if (!$this->esElMismoUsuario($id, $email) && !$this->esAdmin($id)) {
-                return [
-                    'status' => 401,
-                    'message' => "No tiene permisos para modificar este usuario"
-                ];
-            }
-
-            if (!$this->isLoggedIn($id)) {
+            // Verificar permisos: debe ser el mismo usuario O ser administrador
+            if ($currentId != $id && !$this->esAdmin($currentId)) {
                 return [
                     'status' => 403,
-                    'message' => "No estás logueado o tu sesión ha expirado"
+                    'message' => "No tiene permisos para modificar este usuario"
                 ];
             }
 
@@ -245,8 +239,8 @@
                         ];
                     } else {
                         return [
-                            'status' => 204,
-                            'message' => 'No hubo cambios en la actualización'
+                            'status' => 200,
+                            'message' => 'No se realizaron cambios porque los datos son idénticos a los actuales'
                         ];
                     }
                 } else {
@@ -290,7 +284,7 @@
             if($this->tieneReservasActuales($id)){
                 return [
                     'status'=> 400,
-                    'message'=> "No se puede eliminar un usuario con reservas activas"
+                    'message'=> "No se puede eliminar un usuario que tiene reservas asociadas"
                 ];
             }
 
@@ -319,22 +313,21 @@
 
         private function tieneReservasActuales($id): bool {
             $db = (new Conexion())->getDb();
-            $ahora = date('Y-m-d H:i:s');
 
-            $query = "SELECT id FROM bookings WHERE created_by = :id AND booking_datetime > :ahora LIMIT 1";
+            // Verificar si el usuario creó alguna reserva (sin importar si es pasada o futura)
+            $query = "SELECT id FROM bookings WHERE created_by = :id LIMIT 1";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':ahora', $ahora);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($result && isset($result['id'])) {
                 return true;
             }
 
-            $query = "SELECT bp.id FROM booking_participants bp JOIN bookings b ON bp.booking_id = b.id WHERE bp.user_id = :id AND b.booking_datetime > :ahora LIMIT 1";
+            // Verificar si el usuario participa en alguna reserva (sin importar si es pasada o futura)
+            $query = "SELECT id FROM booking_participants WHERE user_id = :id LIMIT 1";
             $stmt = $db->prepare($query);
             $stmt->bindParam(':id', $id);
-            $stmt->bindParam(':ahora', $ahora);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($result && isset($result['id'])) {
