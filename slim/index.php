@@ -313,30 +313,28 @@ $app->delete('/court/{id}', function (Request $request, Response $response, arra
 $app->post('/booking', function (Request $request, Response $response) {
     $user = $request->getAttribute('user'); 
     if (!$user) {
-        $response->getBody()->write(json_encode(['error' => 'No autenticado']));
+        $response->getBody()->write(json_encode(['status'=>401,'message'=>'No autenticado']));
         return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
     }
 
-    $data = $request->getParsedBody() ?: [];
-    
-    $cancha_id = (int)($data['court_id'] ?? 0);
-    $fecha_inicio = $data['booking_datetime'] ?? '';
-    $duracion_bloques = (int)($data['duration_blocks'] ?? 0);
-    $participantes = $data['participants'] ?? [];
-
-    
-    if (is_array($participantes)) {
-        for ($i = 0; $i < count($participantes); $i++) {
-            $participantes[$i] = (int)$participantes[$i];
-        }
-    } else {
-        $participantes = [];
+    $data = $request->getParsedBody();
+    if (!is_array($data)) {
+        $response->getBody()->write(json_encode(['status'=>400,'message'=>'Body inválido']));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
+
+    $cancha_id        = isset($data['court_id']) ? (int)$data['court_id'] : 0;
+    $fecha_inicio_raw = $data['booking_datetime'] ?? '';
+    $duracion_bloques = isset($data['duration_blocks']) ? (int)$data['duration_blocks'] : 0;
+    $participantes    = is_array($data['participants'] ?? null) ? $data['participants'] : [];
+
+   
+    $participantes = array_values(array_unique(array_map('intval', $participantes)));
 
     $usuario_creador = (int)$user['id'];
 
     $reserva = new Reserva();
-    $result = $reserva->crearReserva($cancha_id, $usuario_creador, $fecha_inicio, $duracion_bloques, $participantes);
+    $result = $reserva->crearReserva($cancha_id, $usuario_creador, $fecha_inicio_raw, $duracion_bloques, $participantes);
 
     $response->getBody()->write(json_encode([
         'status'  => $result['status'],
@@ -389,14 +387,29 @@ $app->delete('/booking/{id}', function (Request $solicitud, Response $respuesta,
 
 
 $app->put('/booking_participant/{id}', function (Request $solicitud, Response $respuesta, array $args) {
-    $usuario = $solicitud->getAttribute('user');
-    $reservaId = (int)$args['id'];
-    $datos = $solicitud->getParsedBody() ?: [];
+    $usuario    = $solicitud->getAttribute('user');
+    $id_reserva = (int)$args['id'];
+    $datos      = $solicitud->getParsedBody();
 
-    $nuevosParticipantes = is_array($datos['companeros'] ?? null) ? $datos['companeros'] : [];
+    if (!is_array($datos) || !array_key_exists('companeros', $datos)) {
+        $respuesta->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => "Se requiere el campo 'companeros' en el body"
+        ]));
+        return $respuesta->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+    if (!is_array($datos['companeros'])) {
+        $respuesta->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => "'companeros' debe ser un array de IDs"
+        ]));
+        return $respuesta->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
 
-    $reserva = new Reserva();
-    $resultado = $reserva->modificarParticipantes($reservaId, (int)$usuario['id'], $nuevosParticipantes);
+    $companeros = $datos['companeros'];
+
+    $reserva   = new Reserva();
+    $resultado = $reserva->modificarParticipantes($id_reserva, (int)$usuario['id'], $companeros);
 
     $respuesta->getBody()->write(json_encode([
         'status'  => $resultado['status'],

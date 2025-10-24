@@ -110,21 +110,41 @@
     ];
 }
 
-    public function eliminarCancha(int $id): array {
-    $db = (new Conexion())->getDb();
+    public function eliminarCancha(int $id): array
+{
+    try {
+        $db = (new Conexion())->getDb();
 
-   
-    $stmt = $db->prepare("SELECT id FROM courts WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-    if (!$stmt->fetch()) {
-        return ['status' => 404, 'message' => 'La cancha no existe'];
+       
+        $stmt = $db->prepare("SELECT id FROM courts WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+            return ['status' => 404, 'message' => 'La cancha no existe'];
+        }
+
+        
+        $stmt = $db->prepare("SELECT 1 FROM bookings WHERE court_id = :id LIMIT 1");
+        $stmt->execute([':id' => $id]);
+        if ($stmt->fetchColumn()) {
+            return [
+                'status'  => 409,
+                'message' => 'No se puede eliminar la cancha: existen reservas asociadas'
+            ];
+        }
+
+        
+        $stmt = $db->prepare("DELETE FROM courts WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+
+        if ($stmt->rowCount() > 0) {
+            return ['status' => 200, 'message' => 'Cancha eliminada correctamente'];
+        }
+
+        return ['status' => 404, 'message' => 'La cancha no pudo ser eliminada'];
+
+    } catch (Throwable $e) {
+        return ['status' => 500, 'message' => 'Error al eliminar cancha: ' . $e->getMessage()];
     }
-
-    
-    $stmt = $db->prepare("DELETE FROM courts WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-
-    return ['status' => 200, 'message' => 'Cancha eliminada correctamente'];
 }
 
 
