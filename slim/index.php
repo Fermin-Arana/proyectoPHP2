@@ -47,13 +47,29 @@ $app->get('/', function ($req, $res) {
 /* ================== AUTH ================== */
 $app->post('/login', function (Request $request, Response $response) {
     $data = $request->getParsedBody() ?: [];
-    $email = $data['email'] ?? '';
-    $password = $data['password'] ?? '';
-    $usr = new user();
 
+    $email = trim((string)($data['email'] ?? ''));
+    $password = (string)($data['password'] ?? '');
+
+    if ($email === '' || $password === '') {
+        $response->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => 'Los campos email y password son obligatorios'
+        ]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    if (strpos($email, '@') === false) {
+        $response->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => 'El email no tiene un formato válido'
+        ]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    $usr = new user();
     $result = $usr->login($email, $password);
 
-    
     $response->getBody()->write(json_encode([
         'status'  => $result['status'],
         'message' => $result['message']
@@ -61,7 +77,7 @@ $app->post('/login', function (Request $request, Response $response) {
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-});
+}); //REVISADOOOOOOOOOOO
 
 
 
@@ -90,11 +106,27 @@ $app->post('/logout', function (Request $request, Response $response) {
 /* ================ USUARIOS ==================== */
 $app->post('/user', function (Request $request, Response $response) {
     $data = $request->getParsedBody() ?: [];
-    
-    $email = $data['email'] ?? '';
-    $password = $data['password'] ?? '';
-    $firstName = $data['first_name'] ?? '';
-    $lastName = $data['last_name'] ?? '';
+
+    $email = trim((string)($data['email'] ?? ''));
+    $password = (string)($data['password'] ?? '');
+    $firstName = trim((string)($data['first_name'] ?? ''));
+    $lastName = trim((string)($data['last_name'] ?? ''));
+
+    if ($email === '' || $password === '' || $firstName === '' || $lastName === '') {
+        $response->getBody()->write(json_encode([
+            'status' => 400,
+            'message' => 'Los campos email, password, first_name y last_name son obligatorios'
+        ]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    if (strpos($email, '@') === false) {
+        $response->getBody()->write(json_encode([
+            'status' => 400,
+            'message' => 'El email no tiene un formato válido'
+        ]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
 
     $usr = new user();
     $result = $usr->createUser($email, $password, $firstName, $lastName);
@@ -106,7 +138,7 @@ $app->post('/user', function (Request $request, Response $response) {
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-});
+}); //REVISADOOOOOOO
 
 
 
@@ -143,7 +175,7 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth);
+})->add($auth); //revisado por el canguro
 
 
 
@@ -168,7 +200,7 @@ $app->delete('/user/{id}', function (Request $request, Response $response, array
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth);
+})->add($auth); //revisado por el canguro
 
 
 
@@ -199,7 +231,7 @@ $app->get('/user/{id}', function (Request $request, Response $response, array $a
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth);
+})->add($auth); //revisado por el canguro
 
 
 
@@ -328,7 +360,7 @@ $app->delete('/court/{id}', function (Request $request, Response $response, arra
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($admin)->add($auth);
+})->add($admin)->add($auth); //revisado por el canguro
 
 /* ================ RESERVAS =================== */
 $app->post('/booking', function (Request $request, Response $response) {
@@ -364,7 +396,7 @@ $app->post('/booking', function (Request $request, Response $response) {
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth);
+})->add($auth); //revisado por el canguro
 
 
 $app->get('/booking', function (Request $solicitud, Response $respuesta) {

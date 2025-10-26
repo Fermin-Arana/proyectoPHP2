@@ -3,7 +3,7 @@
     Require_once __DIR__ . '/user.php';
     class Reserva{
         public function listarReservasPorDia(string $fecha): array
-{
+        {
     
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
         return ['status' => 400, 'message' => 'date inválido (YYYY-MM-DD)'];
@@ -448,7 +448,6 @@
             SELECT 1
             FROM bookings b
             WHERE b.id <> :id_reserva
-              AND b.court_id <> :id_cancha
               AND b.created_by = :id_usuario
               AND b.booking_datetime < :fecha_hasta
               AND DATE_ADD(b.booking_datetime, INTERVAL b.duration_blocks*30 MINUTE) > :fecha_desde
@@ -459,7 +458,6 @@
             FROM bookings b
             JOIN booking_participants bp ON bp.booking_id = b.id
             WHERE b.id <> :id_reserva
-              AND b.court_id <> :id_cancha
               AND bp.user_id = :id_usuario
               AND b.booking_datetime < :fecha_hasta
               AND DATE_ADD(b.booking_datetime, INTERVAL b.duration_blocks*30 MINUTE) > :fecha_desde
