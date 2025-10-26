@@ -42,42 +42,77 @@
     }
 }
 
-        public function actualizarCancha(int $id, ?string $name, ?string $desc): array {
+      public function actualizarCancha(int $id, ?string $name, ?string $desc): array
+{
     $db = (new Conexion())->getDb();
 
     
     $q = $db->prepare("SELECT id FROM courts WHERE id = :id");
     $q->execute([':id' => $id]);
-    if (!$q->fetch()) {
+    if (!$q->fetch(PDO::FETCH_ASSOC)) {
         return ['status' => 404, 'message' => 'La cancha no existe'];
+    }
+
+    
+    if ($name === null && $desc === null) {
+        return [
+            'status'  => 400,
+            'message' => 'No se enviaron campos para actualizar'
+        ];
     }
 
     
     if ($name !== null) {
         $name = trim($name);
         if ($name === '' || mb_strlen($name) > 100) {
-            return ['status' => 400, 'message' => 'El nombre es inválido (vacío o >100)'];
+            return [
+                'status'  => 400,
+                'message' => 'El nombre es inválido (vacío o >100)'
+            ];
         }
 
-        
         $dup = $db->prepare("SELECT 1 FROM courts WHERE name = :name AND id <> :id");
         $dup->execute([':name' => $name, ':id' => $id]);
-        if ($dup->fetch()) {
-            return ['status' => 409, 'message' => 'Ya existe una cancha con ese nombre'];
+        if ($dup->fetch(PDO::FETCH_ASSOC)) {
+            return [
+                'status'  => 409,
+                'message' => 'Ya existe una cancha con ese nombre'
+            ];
         }
     }
 
     
-    $sql = "UPDATE courts 
-            SET name = COALESCE(:name, name), 
-                description = COALESCE(:desc, description) 
-            WHERE id = :id";
+    $sets   = [];
+    $params = [':id' => $id];
+
+    if ($name !== null) {
+        $sets[] = "name = :name";
+        $params[':name'] = $name;
+    }
+    if ($desc !== null) {
+        $sets[] = "description = :desc";
+        $params[':desc'] = $desc;
+    }
+
+    
+    if (empty($sets)) {
+        return [
+            'status'  => 400,
+            'message' => 'No se enviaron valores válidos para actualizar'
+        ];
+    }
+
+    $sql = "UPDATE courts SET " . implode(', ', $sets) . " WHERE id = :id";
     $stmt = $db->prepare($sql);
-    $stmt->execute([
-        ':name' => $name,
-        ':desc' => $desc,
-        ':id'   => $id
-    ]);
+    $stmt->execute($params);
+
+   
+    if ($stmt->rowCount() === 0) {
+        return [
+            'status'  => 200,
+            'message' => 'No hubo cambios (los valores ya eran los mismos)'
+        ];
+    }
 
     return [
         'status'  => 200,

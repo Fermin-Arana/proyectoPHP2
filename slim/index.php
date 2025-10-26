@@ -115,7 +115,7 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
     $id = (int)$args['id'];
     $data = $request->getParsedBody() ?: [];
 
-    // Obtener el usuario logueado desde el middleware de autenticación
+   
     $currentUser = $request->getAttribute('user');
     if (!$currentUser || !isset($currentUser['id'])) {
         $response->getBody()->write(json_encode([
@@ -175,7 +175,7 @@ $app->delete('/user/{id}', function (Request $request, Response $response, array
 $app->get('/user/{id}', function (Request $request, Response $response, array $args) {
     $id = (int)$args['id'];
 
-    // Obtener el usuario logueado desde el middleware de autenticación
+   
     $currentUser = $request->getAttribute('user');
     if (!$currentUser || !isset($currentUser['id'])) {
         $response->getBody()->write(json_encode([
@@ -254,18 +254,38 @@ $app->post('/court', function (Request $request, Response $response) {
 
 $app->put('/court/{id}', function (Request $request, Response $response, array $args) {
     $id   = (int)$args['id'];
-    $data = $request->getParsedBody() ?: [];
+    $data = $request->getParsedBody();
+
+    if (!is_array($data)) {
+        $response->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => 'Body inválido'
+        ]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
 
     $name = array_key_exists('name', $data) ? trim((string)$data['name']) : null;
     $desc = array_key_exists('description', $data) ? $data['description'] : null;
 
-    if ($name !== null && mb_strlen($name) > 100) {
-        $response->getBody()->write(json_encode(['error' => 'name ≤ 100 chars']));
+   
+    if ($name === null && $desc === null) {
+        $response->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => 'No se enviaron campos para actualizar'
+        ]));
         return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
     }
 
-    $court = new Court();
     
+    if ($name !== null && mb_strlen($name) > 100) {
+        $response->getBody()->write(json_encode([
+            'status'  => 400,
+            'message' => 'name debe tener 100 caracteres o menos'
+        ]));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
+
+    $court  = new Court();
     $result = $court->actualizarCancha($id, $name, $desc);
 
     $response->getBody()->write(json_encode([
@@ -276,6 +296,7 @@ $app->put('/court/{id}', function (Request $request, Response $response, array $
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
 })->add($admin)->add($auth);
+
 
 $app->get('/court/{id}', function (Request $request, Response $response, array $args) {
     $id   = (int)$args['id'];

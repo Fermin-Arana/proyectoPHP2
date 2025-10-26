@@ -2,34 +2,51 @@
     Require_once __DIR__ . '/Conexion.php';
     Require_once __DIR__ . '/user.php';
     class Reserva{
-        public function listarReservasPorDia(string $fecha): array {
-            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
-                return ['status' => 400, 'message' => 'date inválido (YYYY-MM-DD)'];
-            }
+        public function listarReservasPorDia(string $fecha): array
+{
+    
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+        return ['status' => 400, 'message' => 'date inválido (YYYY-MM-DD)'];
+    }
 
-            $db = (new Conexion())->getDb();
+   
+    list($anio, $mes, $dia) = explode('-', $fecha);
+    $anio = (int)$anio;
+    $mes  = (int)$mes;
+    $dia  = (int)$dia;
 
-            $sql = "
-                SELECT 
-                    b.id,
-                    b.court_id,
-                    c.name        AS cancha,
-                    b.created_by,
-                    b.booking_datetime AS inicio,
-                    DATE_ADD(b.booking_datetime, INTERVAL (b.duration_blocks*30) MINUTE) AS fin,
-                    b.duration_blocks AS bloques
-                FROM bookings b
-                INNER JOIN courts c ON c.id = b.court_id
-                WHERE DATE(b.booking_datetime) = :fecha
-                ORDER BY c.name ASC, b.booking_datetime ASC
-            ";
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':fecha', $fecha);
-            $stmt->execute();
-            $filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!checkdate($mes, $dia, $anio)) {
+        return ['status' => 400, 'message' => 'date no es una fecha válida del calendario'];
+    }
 
-            return ['status' => 200, 'message' => $filas];
-        }
+   
+    $db = (new Conexion())->getDb();
+
+    $sql = "
+        SELECT 
+            b.id,
+            b.court_id,
+            c.name AS cancha,
+            b.created_by,
+            b.booking_datetime AS inicio,
+            DATE_ADD(
+                b.booking_datetime, 
+                INTERVAL (b.duration_blocks*30) MINUTE
+            ) AS fin,
+            b.duration_blocks AS bloques
+        FROM bookings b
+        INNER JOIN courts c ON c.id = b.court_id
+        WHERE DATE(b.booking_datetime) = :fecha
+        ORDER BY c.name ASC, b.booking_datetime ASC
+    ";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(':fecha', $fecha);
+    $stmt->execute();
+    $filas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return ['status' => 200, 'message' => $filas];
+}
 
         public function eliminarReserva(int $reserva_id, int $usuario_id, int $es_admin): array {
             $db = (new Conexion())->getDb();
