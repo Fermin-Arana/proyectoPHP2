@@ -138,7 +138,7 @@ $app->post('/user', function (Request $request, Response $response) {
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-}); //REVISADOOOOOOO
+}); 
 
 
 
@@ -175,7 +175,7 @@ $app->patch('/user/{id}', function (Request $request, Response $response, array 
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth); //revisado por el canguro
+})->add($auth);
 
 
 
@@ -200,7 +200,7 @@ $app->delete('/user/{id}', function (Request $request, Response $response, array
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth); //revisado por el canguro
+})->add($auth); 
 
 
 
@@ -231,7 +231,7 @@ $app->get('/user/{id}', function (Request $request, Response $response, array $a
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth); //revisado por el canguro
+})->add($auth); 
 
 
 
@@ -251,7 +251,7 @@ $app->get('/users', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 });
 
-//funca
+
 
 /* ================ CANCHAS =================== */
 
@@ -360,7 +360,7 @@ $app->delete('/court/{id}', function (Request $request, Response $response, arra
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($admin)->add($auth); //revisado por el canguro
+})->add($admin)->add($auth); 
 
 /* ================ RESERVAS =================== */
 $app->post('/booking', function (Request $request, Response $response) {
@@ -396,7 +396,7 @@ $app->post('/booking', function (Request $request, Response $response) {
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth); //revisado por el canguro
+})->add($auth);
 
 
 $app->get('/booking', function (Request $solicitud, Response $respuesta) {
