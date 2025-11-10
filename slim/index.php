@@ -231,7 +231,7 @@ $app->get('/user/{id}', function (Request $request, Response $response, array $a
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth); 
+})->add($auth); //revisado por el canguro
 
 
 
@@ -251,7 +251,7 @@ $app->get('/users', function (Request $request, Response $response) {
         ->withHeader('Content-Type', 'application/json');
 });
 
-
+//funca
 
 /* ================ CANCHAS =================== */
 
@@ -327,7 +327,7 @@ $app->put('/court/{id}', function (Request $request, Response $response, array $
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($admin)->add($auth);
+})->add($admin)->add($auth); //REVISADO ANTES
 
 
 $app->get('/court/{id}', function (Request $request, Response $response, array $args) {
@@ -360,7 +360,7 @@ $app->delete('/court/{id}', function (Request $request, Response $response, arra
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($admin)->add($auth); 
+})->add($admin)->add($auth); //revisado por el canguro
 
 /* ================ RESERVAS =================== */
 $app->post('/booking', function (Request $request, Response $response) {
@@ -396,7 +396,7 @@ $app->post('/booking', function (Request $request, Response $response) {
     return $response
         ->withStatus((int)$result['status'])
         ->withHeader('Content-Type', 'application/json');
-})->add($auth);
+})->add($auth); //revisado por el canguro
 
 
 $app->get('/booking', function (Request $solicitud, Response $respuesta) {

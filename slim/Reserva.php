@@ -398,13 +398,11 @@
 
   public function modificarParticipantes(int $id_reserva, int $id_usuario_actual, array $companeros_nuevos): array
 {
-    
     $companeros_nuevos = array_values(array_unique(array_map('intval', $companeros_nuevos)));
 
     try {
         $bd = (new Conexion())->getDb();
 
-      
         $stmt_reserva = $bd->prepare("
             SELECT id, court_id, created_by, booking_datetime, duration_blocks
             FROM bookings
@@ -424,21 +422,17 @@
         $minutos      = ((int)$reserva['duration_blocks']) * 30;
         $fecha_hasta  = date('Y-m-d H:i:s', strtotime($fecha_desde . " + {$minutos} minutes"));
 
-        
         if ($id_creador !== (int)$id_usuario_actual) {
             return ['status' => 403, 'message' => 'Solo el creador puede modificar los participantes'];
         }
 
-        
         $companeros_nuevos = array_filter($companeros_nuevos, fn($id_u) => $id_u !== $id_creador);
 
-        
         $total_jugadores = 1 + count($companeros_nuevos);
         if (!in_array($total_jugadores, [2, 4], true)) {
             return ['status' => 400, 'message' => 'La reserva debe tener 2 (single) o 4 (dobles) jugadores'];
         }
 
-        
         if (!empty($companeros_nuevos)) {
             $placeholders    = implode(',', array_fill(0, count($companeros_nuevos), '?'));
             $stmt_existencia = $bd->prepare("SELECT id FROM users WHERE id IN ($placeholders)");
@@ -451,12 +445,10 @@
             }
         }
 
-        
         $sql_colision_creador = "
             SELECT 1
             FROM bookings b
             WHERE b.id <> :id_reserva
-              AND b.court_id <> :id_cancha
               AND b.created_by = :id_usuario
               AND b.booking_datetime < :fecha_hasta
               AND DATE_ADD(b.booking_datetime, INTERVAL b.duration_blocks*30 MINUTE) > :fecha_desde
@@ -468,7 +460,6 @@
             FROM bookings b
             JOIN booking_participants bp ON bp.booking_id = b.id
             WHERE b.id <> :id_reserva
-              AND b.court_id <> :id_cancha
               AND bp.user_id = :id_usuario
               AND b.booking_datetime < :fecha_hasta
               AND DATE_ADD(b.booking_datetime, INTERVAL b.duration_blocks*30 MINUTE) > :fecha_desde
@@ -478,16 +469,37 @@
         $stmt_colision_creador      = $bd->prepare($sql_colision_creador);
         $stmt_colision_participante = $bd->prepare($sql_colision_participante);
 
+        // NUEVO: validar colisión para el creador
+        $paramsCreador = [
+            ':id_reserva'  => $id_reserva,
+            ':id_usuario'  => $id_creador,
+            ':fecha_desde' => $fecha_desde,
+            ':fecha_hasta' => $fecha_hasta,
+        ];
+        $stmt_colision_creador->execute($paramsCreador);
+        if ($stmt_colision_creador->fetchColumn()) {
+            return [
+                'status'  => 409,
+                'message' => "El creador (usuario {$id_creador}) tiene una reserva solapada (como creador)"
+            ];
+        }
+        $stmt_colision_participante->execute($paramsCreador);
+        if ($stmt_colision_participante->fetchColumn()) {
+            return [
+                'status'  => 409,
+                'message' => "El creador (usuario {$id_creador}) tiene una reserva solapada (como participante)"
+            ];
+        }
+
+        // validar compañeros nuevos
         foreach ($companeros_nuevos as $id_usuario_companero) {
             $paramsColision = [
                 ':id_reserva'  => $id_reserva,
-                ':id_cancha'   => $id_cancha,
                 ':id_usuario'  => $id_usuario_companero,
                 ':fecha_desde' => $fecha_desde,
                 ':fecha_hasta' => $fecha_hasta,
             ];
 
-            
             $stmt_colision_creador->execute($paramsColision);
             if ($stmt_colision_creador->fetchColumn()) {
                 return [
@@ -496,7 +508,6 @@
                 ];
             }
 
-           
             $stmt_colision_participante->execute($paramsColision);
             if ($stmt_colision_participante->fetchColumn()) {
                 return [
@@ -506,10 +517,8 @@
             }
         }
 
-        
         $bd->beginTransaction();
 
-       
         $stmt_borrar = $bd->prepare("
             DELETE FROM booking_participants
             WHERE booking_id = :id_reserva
@@ -520,7 +529,6 @@
             ':id_creador' => $id_creador
         ]);
 
-       
         if (!empty($companeros_nuevos)) {
             $stmt_insertar = $bd->prepare("
                 INSERT INTO booking_participants (booking_id, user_id)
@@ -532,7 +540,6 @@
                     continue;
                 }
 
-               
                 $stmt_existe = $bd->prepare("
                     SELECT 1
                     FROM booking_participants
