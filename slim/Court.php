@@ -182,6 +182,22 @@
     }
 }
 
+public function listarCanchas(): array{
+    try {
+        $db = (new Conexion())->getDb();
+
+        $stmt = $db->prepare("SELECT id, name, description FROM courts");
+        $stmt->execute();
+
+        $canchas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return ['status' => 200, 'message' => $canchas];
+
+    } catch(PDOException $e){
+        return ['status' => 500, 'message' => 'Error al listar las canchas: ' . $e->getMessage()];
+    }
+}
+
 
 
 }

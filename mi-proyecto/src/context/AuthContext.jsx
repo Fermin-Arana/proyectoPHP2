@@ -29,28 +29,40 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await loginService(email, password);
-      
-            if (!response.data?.message?.token || !response.data?.message?.user) {
-                throw new Error('Respuesta inválida del servidor');
+            const responseData = await loginService(email, password);
+            console.log("Respuesta de loginService (en el TRY):", responseData);
+            const message = responseData?.message;
+            if (responseData.status !== 200 || !message?.token) {
+                console.error("Status no es 200 o no se encontró 'message.token'", responseData);
+                throw new Error('Respuesta inválida del servidor (sin token o status incorrecto)');
             }
-
-            const { token, user } = response.data.message;
-
+            const token = message.token;
+            const user = {
+                id: message.id,
+                email: message.email
+            };
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-
             setToken(token);
             setUser(user);
-      
-            return response;
+            return responseData;
+
         } catch (error) {
+            console.error("Error COMPLETO del CATCH:", error);
+            let errorMessage = 'Error durante el login';
+            if (error.response && error.response.data) {
+                errorMessage = error.response.data.message || error.response.data.error || JSON.stringify(error.response.data);
+            } 
+            else if (error.message) {
+                errorMessage = error.message;
+            }
+
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setToken(null);
             setUser(null);
-            const mensajeDelBackend = error.response?.data?.message;
-            throw new Error(mensajeDelBackend || error.message || 'Error durante el login');
+            
+            throw new Error(errorMessage);
         }
     };
 

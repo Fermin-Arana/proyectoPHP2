@@ -362,6 +362,19 @@ $app->delete('/court/{id}', function (Request $request, Response $response, arra
         ->withHeader('Content-Type', 'application/json');
 })->add($admin)->add($auth); //revisado por el canguro
 
+$app->get('/courts', function (Request $request, Response $response) {
+    $court = new Court();
+    $result = $court->listarCanchas();
+
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+});
+
 /* ================ RESERVAS =================== */
 $app->post('/booking', function (Request $request, Response $response) {
     $user = $request->getAttribute('user'); 

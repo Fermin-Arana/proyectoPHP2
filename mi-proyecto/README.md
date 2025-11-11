@@ -18,3 +18,4 @@ If you are developing a production application, we recommend using TypeScript wi
 ## agregado por mi
 
 npm install react-router-dom
+agregue tambien el endpoint GET courts para que me devuelva todas las canchas porque sino no habia forma
