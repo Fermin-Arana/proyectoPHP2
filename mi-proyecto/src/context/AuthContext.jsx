@@ -39,7 +39,10 @@ export const AuthProvider = ({ children }) => {
             const token = message.token;
             const user = {
                 id: message.id,
-                email: message.email
+                email: message.email,
+                is_admin: message.is_admin,
+                first_name: message.first_name,
+                last_name: message.last_name
             };
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));

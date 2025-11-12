@@ -3,9 +3,8 @@ import api from '../api.js';
 export const edit = async(id, userData) => {
     try{
         const apiData = {
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            password: userData.password
+            first_name: userData.first_name,
+            last_name: userData.last_name
         };
         const response = await api.patch(`/user/${id}`, apiData);
         return response.data;

@@ -5,7 +5,7 @@
         public function login($email, $password):array{
             $db = (new Conexion())->getDb(); //conecto la base de datos
 
-            $query = "SELECT id FROM users WHERE email = :email AND password = :password"; //hago la consulta
+            $query = "SELECT id, is_admin FROM users WHERE email = :email AND password = :password"; //hago la consulta
 
             $stmt = $db->prepare($query); //preparo la consulta
 
@@ -18,6 +18,7 @@
 
             if($result && isset($result['id'])){
                 $id = $result['id'];
+                $is_admin = $result['is_admin'];
                 $token = $this->nuevoToken($email,$id);
                 if($token){
                     return[
@@ -25,7 +26,8 @@
                         'message' =>[
                             'token' => $token,
                             'email' => $email,
-                            'id' => $id
+                            'id' => $id,
+                            'is_admin' => $is_admin
                         ]
                     ];
                 } 
@@ -464,11 +466,11 @@
 
             if ($search != '') {
                 $search = "%$search%";
-                $query = "SELECT email, first_name, last_name, is_admin FROM users WHERE is_admin = 0 AND (email LIKE :search OR first_name LIKE :search OR last_name LIKE :search)";
+                $query = "SELECT id, email, first_name, last_name, is_admin FROM users WHERE is_admin = 0 AND (email LIKE :search OR first_name LIKE :search OR last_name LIKE :search)";
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(':search', $search);
             } else {
-                $query = "SELECT email, first_name, last_name, is_admin FROM users WHERE is_admin = 0";
+                $query = "SELECT id, email, first_name, last_name, is_admin FROM users WHERE is_admin = 0";
                 $stmt = $db->prepare($query);
             }
 
