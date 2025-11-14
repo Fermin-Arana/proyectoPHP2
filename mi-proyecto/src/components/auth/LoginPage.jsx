@@ -1,6 +1,7 @@
 import {useAuth} from '../../context/AuthContext.jsx';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../button/Button.jsx'
 
 const LoginPage = () =>{
     const [email, setEmail] = useState('');
@@ -69,7 +70,7 @@ const LoginPage = () =>{
                         autoComplete="password"
                     />
 
-                    <button type="submit" className="login-btn"> Iniciar sesion </button>
+                    <Button type="submit" className="login-btn"> Iniciar sesion </Button>
                 </form>
             </div>
         </div>

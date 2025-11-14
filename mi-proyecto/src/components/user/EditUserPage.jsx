@@ -1,10 +1,11 @@
-import { edit}  from '../../services/apiUsers/editUser.js'
+import { edit }  from '../../services/apiUsers/editUser.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useState } from "react"
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import Button from '../button/Button.jsx'
 
 const EditUserPage = () => {
-    const { user } = useAuth();
+    const { user, isAutenticated } = useAuth();
     const [first_name, setFirstName] = useState(user.first_name || '');
     const [last_name, setLastName] = useState(user.last_name || '');
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ const EditUserPage = () => {
 
     return(
         <div className="edit-user-container">
+            {isAutenticated && (
             <div className="edit-user-form">
                 <h2 className="edit-user-tittle">
                     Editar usuario
@@ -52,9 +54,16 @@ const EditUserPage = () => {
                         className="form-input"
                         autoComplete="Apellido"
                     />
-                    <button type="submit" className="edit-btn">Editar</button>              
+                    <Button type="submit" className="edit-btn">Editar</Button>              
                 </form>
             </div>
+            )}
+            {!isAutenticated && (
+                <div className="not-autenticated-container">
+                    <p className="not-autenticated-message"> Inicia sesion para poder editar tu usuario </p>
+                    <Link to="/login"> Iniciar sesion </Link>
+                </div>
+            )}
         </div>
     )
 

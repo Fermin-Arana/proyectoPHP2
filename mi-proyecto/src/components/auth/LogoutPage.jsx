@@ -1,5 +1,6 @@
 import {useAuth} from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom'
+import Button from '../button/Button.jsx'
 
 const LogoutPage = () => {
     
@@ -23,13 +24,13 @@ const LogoutPage = () => {
             {!isAuthenticated && (
             <div className="not-authenticated-container">
                 <p className="not-authenticated-message"> No estas logueado! Inicia sesion aqui</p>
-                <button onClick= { () => navigate('/login') } className="login-btn"> Iniciar sesion </button>
+                <Button onClick= { () => navigate('/login') } className="login-btn"> Iniciar sesion </Button>
             </div>
             )}
             {isAuthenticated && (
                 <div className="authenticated-container">
                     <p className="authenticated-message"> Estas seguro que quieres cerrar sesion?</p>
-                    <button onClick= {handlerLogout} className="logout-btn"> Cerrar sesion </button>
+                    <Button onClick= {handlerLogout} className="logout-btn"> Cerrar sesion </Button>
                 </div>
             )}
         </div>

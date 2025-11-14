@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import Button from '../button/Button.jsx'
 
 const RegisterPage = () => {
     const [email,setEmail] = useState('');
@@ -134,7 +135,7 @@ const RegisterPage = () => {
                         autoComplete="new-password"
                     />
                     
-                    <button type="submit" className="register-btn">Registrarse </button>
+                    <Button type="submit" className="register-btn">Registrarse </Button>
                 </form>
             </div>
         </div>
