@@ -34,6 +34,9 @@ const NavBarComponent = () =>{
                         <li className="nav-bar-link">
                             <Link to="/logout"> Cerrar sesion </Link>
                         </li>
+                        <li className="nav-bar-link">
+                            <Link to="/create-booking"> Crear reserva </Link>
+                        </li>
                         {isAdmin && (
                             <>
                                 <li className="nav-bar-link">

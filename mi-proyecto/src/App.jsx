@@ -12,6 +12,7 @@ import LogoutPage from './components/auth/LogoutPage.jsx'
 import UpdateCourtPage from './components/courts/UpdateCourtPage.jsx'
 import DeleteCourtPage from './components/courts/DeleteCourtPage.jsx'
 import EditPasswordPage from './components/user/EditPasswordPage.jsx'
+import CreateBookingPage from './components/bookings/CreateBookingPage.jsx'
 import { AuthProvider } from './context/AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -34,6 +35,7 @@ function App() {
           <Route path="logout" element = {<LogoutPage/>}/>
           <Route path="/update-court/:id" element = {< UpdateCourtPage />} />
           <Route path="/delete-court/:id" element = {< DeleteCourtPage />} />
+          <Route path="/create-booking" element = {< CreateBookingPage />} />
         </Routes>
       </AuthProvider>
     </Router>
