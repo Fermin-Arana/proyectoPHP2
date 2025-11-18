@@ -139,6 +139,7 @@ const CreateBookingPage = () => {
                 const fechaString = fechaSeleccionada.toISOString().split('T')[0];
                 const res = await bookingsByDay(fechaString);
                 setBookings(res.message);
+                navigate('/')
             } else {
                 setError(response.message);
             }

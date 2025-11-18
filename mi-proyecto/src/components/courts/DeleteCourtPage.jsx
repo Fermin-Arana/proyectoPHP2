@@ -22,6 +22,22 @@ const DeleteCourtPage = () =>{
             throw error;
         }
     };
+
+    return (
+        <div className="delete-container">
+            {isAdmin && (
+                <>
+                    <h2 className="delete-tittle">Eliminar cancha</h2>
+                    <p>Estas seguro que queres borrar la cancha?</p>
+                    <Button onClick={handleSubmit} className="delete-btn">Si, borrar</Button>
+                    <Button onClick={()=> navigate("/courts")} className="delete-btn">No, volver</Button>
+                </>
+            )}
+            {!isAdmin && (
+                <p>No tienes permiso para estar en esta seccion.</p>
+            )}
+        </div>
+    )
 }
 
 export default DeleteCourtPage

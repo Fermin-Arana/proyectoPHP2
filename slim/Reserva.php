@@ -577,6 +577,36 @@
     }
 }
 
+public function listarParticipantes(int $booking_id): array
+    {
+        try {
+            $db = (new Conexion())->getDb();
+            $stmt_reserva = $db->prepare('SELECT id FROM bookings WHERE id = :id');
+            $stmt_reserva->execute([':id' => $booking_id]);
+            if (!$stmt_reserva->fetch(PDO::FETCH_ASSOC)) {
+                return ['status' => 404, 'message' => 'La reserva no existe'];
+            }
+            $stmt_parts = $db->prepare("
+                SELECT u.id, u.first_name, u.last_name, u.email 
+                FROM users u
+                JOIN booking_participants bp ON u.id = bp.user_id
+                WHERE bp.booking_id = :booking_id
+            ");
+            $stmt_parts->execute([':booking_id' => $booking_id]);
+            $participantes = $stmt_parts->fetchAll(PDO::FETCH_ASSOC);
+
+            return ['status' => 200, 'message' => $participantes];
+
+        } catch (\Throwable $e) {
+            return [
+                'status'  => 500,
+                'message' => 'Error al listar participantes: ' . $e->getMessage()
+            ];
+        }
+    }
+
+
+
 
 
 

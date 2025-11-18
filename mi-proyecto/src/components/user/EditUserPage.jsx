@@ -1,19 +1,27 @@
 import { edit }  from '../../services/apiUsers/editUser.js'
 import { useAuth } from '../../context/AuthContext.jsx'
-import { useState } from "react"
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from "react"
+import { useNavigate, Link, useParams } from 'react-router-dom'
 import Button from '../button/Button.jsx'
 
 const EditUserPage = () => {
-    const { user, isAutenticated } = useAuth();
-    const [first_name, setFirstName] = useState(user.first_name || '');
-    const [last_name, setLastName] = useState(user.last_name || '');
+    const { user, isAuthenticated, isAdmin } = useAuth();
+    const { id } = useParams();
+    const [first_name, setFirstName] = useState('');
+    const [last_name, setLastName] = useState('');
     const navigate = useNavigate();
+
+    useEffect(() =>{
+        if (user && user.id === Number(id)) {
+            setFirstName(user.first_name || '');
+            setLastName(user.last_name || '');
+        }
+    },[user,id])
 
     const handleSubmit = async(e) =>{
         e.preventDefault();
         try{
-            const response = await edit(user.id,{
+            const response = await edit(id,{
                 first_name: first_name,
                 last_name: last_name
             });
@@ -32,7 +40,7 @@ const EditUserPage = () => {
 
     return(
         <div className="edit-user-container">
-            {isAutenticated && (
+            {(isAuthenticated || isAdmin) && (
             <div className="edit-user-form">
                 <h2 className="edit-user-tittle">
                     Editar usuario
@@ -58,7 +66,7 @@ const EditUserPage = () => {
                 </form>
             </div>
             )}
-            {!isAutenticated && (
+            {(!isAuthenticated && !isAdmin)  && (
                 <div className="not-autenticated-container">
                     <p className="not-autenticated-message"> Inicia sesion para poder editar tu usuario </p>
                     <Link to="/login"> Iniciar sesion </Link>

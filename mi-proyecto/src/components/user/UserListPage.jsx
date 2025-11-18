@@ -1,10 +1,13 @@
 import { searchUsers } from '../../services/apiUsers/searchUser.js'
 import { useState, useEffect } from "react"
-import {useAuth} from '../../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext.jsx';
+import Button from '../button/Button.jsx'
 
 const UserList = () => {
     const [users, setUsers] = useState([]);
     const { isAdmin } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(()=>{
         const cargarUsuarios = async () => {
@@ -35,11 +38,14 @@ const UserList = () => {
                 <div className="users-list"> 
                 {users.map((user,index) => (
                     <li key={index}>
-                        ID: 
+                        ID:  {' '} 
                         {user.id}
-                        {' '}
-                        EMAIL: 
+                        {'    '}
+                        Email: {' '}
                         {user.email}
+                        <Button onClick={()=> navigate(`/info-user/${user.id}`)}>Ver usuario</Button>
+                        <Button onClick={()=> navigate(`/edituser/${user.id}`)}>Editar usuario</Button>
+                        <Button onClick={()=> navigate(`/delete-user/${user.id}`)}>Eliminar usuario</Button>
                     </li>
                 ))}
                 </div>

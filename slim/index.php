@@ -428,6 +428,20 @@ $app->get('/booking', function (Request $solicitud, Response $respuesta) {
         ->withHeader('Content-Type', 'application/json');
 });
 
+$app->get('/booking/{id}/participants', function (Request $request, Response $response, array $args) {
+    $booking_id = (int)$args['id'];
+    $reserva = new Reserva();
+    $result = $reserva->listarParticipantes($booking_id);
+    $response->getBody()->write(json_encode([
+        'status'  => $result['status'],
+        'message' => $result['message']
+    ]));
+    return $response
+        ->withStatus((int)$result['status'])
+        ->withHeader('Content-Type', 'application/json');
+
+});
+
 
 
 

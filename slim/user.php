@@ -5,7 +5,7 @@
         public function login($email, $password):array{
             $db = (new Conexion())->getDb(); //conecto la base de datos
 
-            $query = "SELECT id, is_admin FROM users WHERE email = :email AND password = :password"; //hago la consulta
+            $query = "SELECT id, is_admin, first_name, last_name FROM users WHERE email = :email AND password = :password"; //hago la consulta
 
             $stmt = $db->prepare($query); //preparo la consulta
 
@@ -19,11 +19,15 @@
             if($result && isset($result['id'])){
                 $id = $result['id'];
                 $is_admin = $result['is_admin'];
+                $first_name = $result['first_name'];
+                $last_name = $result['last_name'];
                 $token = $this->nuevoToken($email,$id);
                 if($token){
                     return[
                         'status' => 200,
                         'message' =>[
+                            'first_name'=> $first_name,
+                            'last_name'=> $last_name,
                             'token' => $token,
                             'email' => $email,
                             'id' => $id,
