@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom' //useParams es para usar los parametros que se pasan en la url
 import Button from '../button/Button.jsx'
+import './courtStyle.css'
 
 const UpdateCourtPage = () => {
     const { isAdmin } = useAuth();

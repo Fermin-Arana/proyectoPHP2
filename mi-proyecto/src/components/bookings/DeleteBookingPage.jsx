@@ -2,6 +2,7 @@ import { deleteBooking } from '../../services/apiBooking/deleteBooking'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useState } from 'react'
 import Button from '../button/Button'
+import './bookingStyle.css';
 
 const DeleteBookingPage = () =>{
     const { id } = useParams();
@@ -27,14 +28,19 @@ const DeleteBookingPage = () =>{
     }
     return (
         <div className="delete-booking-container">
-            {!error && (
-                <>
-                    <h2 className="delete-booking-tittle">Estas seguro que queres eliminar tu reserva?</h2>
-                    <Button onClick={handleSubmit} className="delete-btn">Si, eliminar</Button>
-                    <Button onClick={()=> navigate("/")} className="delete-btn">No, volver</Button>  
-                </>       
-            )}
-            {error && <p className="error-message">{error}</p>}
+            <div className="delete-booking-card">
+                {!error && (
+                    <>
+                        <h2 className="delete-booking-tittle">Estas seguro que queres eliminar tu reserva?</h2>
+                        <p className="warning-text">Esta acción liberará la cancha para otros usuarios.</p>
+                        <div className="delete-booking-actions">
+                            <Button onClick={handleSubmit} className="btn-danger">Si, eliminar</Button>
+                            <Button onClick={()=> navigate("/")} className="btn-secondary">No, volver</Button>  
+                        </div>
+                    </>       
+                )}
+                {error && <p className="error-message">{error}</p>}
+            </div>
         </div>
     )
 }

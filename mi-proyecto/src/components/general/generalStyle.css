@@ -1,0 +1,252 @@
+.header{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 0;
+    position: fixed; 
+    top: 0;
+    width: 100%; 
+    left:0;
+    z-index: 2; 
+    background-color: #007BFF; 
+    display: flex;
+    align-items:center;
+    justify-content: flex-start;
+}
+
+.header-link {
+    display: flex;
+    align-items: center; 
+    text-decoration: none; 
+    color: #FFFFFF; 
+    margin-right: auto;
+}
+
+h1{
+    display: inline-block;
+    text-decoration: none; 
+    color: #FFFFFF; 
+    margin: 0 15px;
+    margin-top: 0;     
+    margin-bottom: 0;
+}
+
+h3{
+    display: inline-block;
+    text-decoration: none; 
+    color: #FFFFFF; 
+    margin: 0 15px;
+    margin-left: 15px;
+}
+
+.header-logo{
+    margin-right: auto;
+    width: 200px;  
+    height: 50px; 
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.nav-bar-container{
+    background-color: #f8f9fa; 
+    border-bottom: 1px solid #dee2e6; 
+    width: 100%;
+    padding: 0;
+    position: fixed; 
+    top: 60px;       
+    left: 0;              
+    z-index: 1;
+}
+
+.nav-bar-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding:0;
+    align-items: stretch;
+}
+
+.nav-bar-link {
+    margin: 0; 
+    flex-grow: 1;   
+    flex-basis: 0; 
+    height: 100%; 
+    display: flex;
+}
+
+.nav-bar-link a{
+    text-decoration: none;
+    color: #495057; 
+    font-weight: 600;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    display: flex; 
+    height: 100%; 
+    padding: 10px 0;
+    align-items: center;
+    justify-content: center; 
+    width: 100%;
+}
+
+.nav-bar-link a:hover {
+    background-color: #0b4380; 
+    color:#FFFFFF;
+}
+
+.footer {
+    background-color: #333; 
+    color: white;
+    text-align: center; 
+    padding: 20px 0;
+    width: 100%;
+    margin-top: auto; 
+}
+
+.footer-text {
+    margin: 0;
+}
+
+.grilla-horarios-container {
+    padding: 30px;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+    margin: 0 auto 20px auto;
+    max-width: 1200px; 
+    width: 95%;
+}
+
+
+.grilla-horarios-container h1 {
+    color: #212529; 
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 700;
+    border-bottom: 2px solid #007BFF;
+    display: inline-block; 
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: fit-content; 
+    padding-bottom: 10px;
+}
+
+.date-picker-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    background-color: #F8F9FA; 
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.date-picker-container label {
+    color: #212529;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.date-picker-container input {
+    padding: 8px 12px;
+    border: 2px solid #007BFF; 
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #495057;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+}
+
+.date-picker-container input:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); 
+}
+
+.tabla {
+    width: 100%;
+    border-collapse: collapse; 
+    background-color: #FFFFFF;
+    overflow: hidden; 
+    border-radius: 8px 8px 0 0;
+}
+
+.tabla thead tr {
+    background-color: #007BFF; 
+    color: #FFFFFF; 
+    text-align: center;
+    height: 50px;
+}
+
+.tabla th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    padding: 15px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2); 
+}
+
+
+.horario-texto {
+    background-color: #F8F9FA; 
+    color: #212529;
+    font-weight: 700;
+    text-align: center;
+    width: 100px; 
+    border-right: 2px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+
+.tabla td {
+    height: 50px; 
+    border-bottom: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    transition: all 0.2s ease-in-out;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.reserva-libre {
+    background-color: #FFFFFF;
+    cursor: pointer; 
+}
+
+.reserva-libre:hover {
+    background-color: #e7f1ff;
+}
+
+
+.reserva-ocupada {
+    background-color: #28a745;
+    color: #FFFFFF;
+    font-weight: 500;
+    cursor: pointer; 
+    position: relative;
+}
+
+.reserva-ocupada:hover {
+    background-color: #218838; 
+    transform: scale(1.02); 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+
+@media (max-width: 768px) {
+    .grilla-horarios-container {
+        padding: 10px;
+        width: 100%;
+    }
+    
+    .tabla {
+        display: block;
+        overflow-x: auto; 
+        white-space: nowrap;
+    }
+}
+

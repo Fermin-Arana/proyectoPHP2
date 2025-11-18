@@ -1,19 +1,23 @@
+
+import './Button.css'; 
+
 const Button = ({
     onClick,
     children,
-    type='button',
-    className='',
-    disabled=false
+    type = 'button',
+    className = '', 
+    disabled = false
 }) => {
     return (
         <button
-        type={type}
-        onClick={onClick}
-        className={className}
-        disabled={disabled}>
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            className={`tenis-button ${className}`} 
+        >
             {children}
         </button>
     )
 }
 
-export default Button
+export default Button;

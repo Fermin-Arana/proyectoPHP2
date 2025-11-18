@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext.jsx'
 import { useState, useEffect } from "react"
 import { useNavigate, Link, useParams } from 'react-router-dom'
 import Button from '../button/Button.jsx'
+import './userStyle.css'
 
 const EditUserPage = () => {
     const { user, isAuthenticated, isAdmin } = useAuth();

@@ -1,4 +1,4 @@
-import { edit }  from '../../services/apiUsers/editUser.js'
+import { changePassword }  from '../../services/apiUsers/changePassword.js'
 import { useAuth } from '../../context/AuthContext.jsx'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
@@ -37,7 +37,7 @@ const EditPasswordPage = () =>{
     }
 
     const handleSubmit = async(e) => {
-        e.preventdefault();
+        e.preventDefault();
         setErrors([]);
         const erroresValidacion = validar();
         if(erroresValidacion.length > 0){
@@ -45,7 +45,7 @@ const EditPasswordPage = () =>{
             return;
         }
         try{
-            const response = await edit(password);
+            const response = await changePassword(user.id, password);
             if(response.status === 200){
                 console.log("Contraseña cambiada con exito!");
                 navigate("/login");
@@ -77,7 +77,7 @@ const EditPasswordPage = () =>{
                         type="text"
                         placeholder="Contraseña"
                         value={password}
-                        onChange={() => setPassword(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="form-input"
                         autoComplete="Contraseña">
                         </input>

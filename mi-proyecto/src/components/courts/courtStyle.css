@@ -1,0 +1,236 @@
+
+.court-page-container {
+  max-width: 1200px;
+  margin: 0 auto; 
+  padding: 40px 20px;
+  background-color: #f8f9fa; 
+  min-height: 100vh;
+}
+
+.court-page-container h1 {
+  text-align: center;
+  color: #007BFF;
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.courts-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.one-court {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 10px; 
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); 
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; 
+}
+
+
+.one-court:hover {
+  transform: translateY(-5px); 
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  border-color: #007BFF;
+}
+
+
+.one-court h2 {
+  color: #212529; 
+  font-size: 1.5rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #007BFF; 
+  padding-bottom: 10px;
+  display: inline-block;
+}
+
+
+.one-court p {
+  color: #6c757d;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  flex-grow: 1; 
+}
+
+
+.court-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto; 
+  flex-wrap: wrap;
+}
+
+.error-message {
+  color: #dc3545; 
+  font-size: 0.9rem;
+  background-color: #f8d7da;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 15px;
+  border: 1px solid #f5c6cb;
+  text-align: center;
+  width: 100%;
+}
+
+.update-court-container {
+    background-color: #f8f9fa; 
+    min-height: 100vh;
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center; 
+    align-items: flex-start;
+}
+
+.update-court-forms {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #dee2e6;
+    width: 100%;
+    max-width: 500px; 
+}
+
+
+.update-court-tittle {
+    text-align: center;
+    color: #212529;
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-weight: 700;
+    
+    border-bottom: 2px solid #007BFF;
+    display: table; 
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 10px;
+}
+
+.update-court-forms form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+}
+
+.form-input {
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #495057;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #007BFF;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.update-btn {
+    width: 100%; 
+    margin-top: 10px;
+    font-size: 1.1rem;
+}
+
+
+.no-admin-message {
+    background-color: #fff3cd; 
+    color: #856404; 
+    border: 1px solid #ffeeba;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.delete-court-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+}
+
+.delete-court-card {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #dee2e6;
+    width: 100%;
+    max-width: 500px;
+    text-align: center; 
+}
+
+
+.delete-court-tittle {
+    color: #212529;
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 700;
+    border-bottom: 2px solid #dc3545;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+.delete-warning-text {
+    color: #495057;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.delete-court-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px; 
+}
+
+.btn-danger {
+    background-color: #dc3545 !important;
+    width: 100%; 
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b !important;
+}
+
+
+.btn-secondary {
+    background-color: #6c757d !important;
+    width: 100%;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268 !important;
+}
+
+
+@media (max-width: 576px) {
+    .delete-court-actions {
+        flex-direction: column; 
+    }
+}
+
+
+@media (max-width: 576px) {
+    .update-court-forms {
+        padding: 25px; 
+    }
+    
+    .update-court-tittle {
+        font-size: 1.5rem;
+    }
+}

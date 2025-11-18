@@ -1,4 +1,4 @@
-//import './App.css'
+import './App.css'
 import HeaderComponent from './components/general/HeaderComponent.jsx';
 import FooterComponent from './components/general/FooterComponent.jsx';
 import NavBarComponent from './components/general/NavBarComponent.jsx';
@@ -25,26 +25,29 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <HeaderComponent />
-        <FooterComponent />
-        <NavBarComponent />
-        <Routes>
-          <Route path="/" element={<Home/>} />
-          <Route path="/courts" element={<CourtPage/>} />
-          <Route path="/register" element={<RegisterPage/>} />
-          <Route path="/login" element={<LoginPage/>} />
-          <Route path="/userlist" element={<UserList/>} />
-          <Route path="/edituser/:id" element= {<EditUserPage/>} />
-          <Route path="/editpassword" element= {<EditPasswordPage/>} />
-          <Route path="logout" element = {<LogoutPage/>}/>
-          <Route path="/update-court/:id" element = {< UpdateCourtPage />} />
-          <Route path="/delete-court/:id" element = {< DeleteCourtPage />} />
-          <Route path="/create-booking" element = {< CreateBookingPage />} />
-          <Route path="/update-booking/:id" element = {< UpdateBookingPage />} />
-          <Route path="/delete-booking/:id" element = {< DeleteBookingPage />} />
-          <Route path="/delete-user/:id" element = {< DeleteUserPage />} />
-          <Route path="/info-user/:id" element = {< InfoUserPage />} />
-        </Routes>
+        <div className="app-container"></div>
+          <HeaderComponent />
+          <NavBarComponent />
+          <div className="main-content">
+            <Routes>
+              <Route path="/" element={<Home/>} />
+              <Route path="/courts" element={<CourtPage/>} />
+              <Route path="/register" element={<RegisterPage/>} />
+              <Route path="/login" element={<LoginPage/>} />
+              <Route path="/userlist" element={<UserList/>} />
+              <Route path="/edituser/:id" element= {<EditUserPage/>} />
+              <Route path="/editpassword" element= {<EditPasswordPage/>} />
+              <Route path="logout" element = {<LogoutPage/>}/>
+              <Route path="/update-court/:id" element = {< UpdateCourtPage />} />
+              <Route path="/delete-court/:id" element = {< DeleteCourtPage />} />
+              <Route path="/create-booking" element = {< CreateBookingPage />} />
+              <Route path="/update-booking/:id" element = {< UpdateBookingPage />} />
+              <Route path="/delete-booking/:id" element = {< DeleteBookingPage />} />
+              <Route path="/delete-user/:id" element = {< DeleteUserPage />} />
+              <Route path="/info-user/:id" element = {< InfoUserPage />} />
+            </Routes>
+          </div>
+          <FooterComponent />
       </AuthProvider>
     </Router>
   )

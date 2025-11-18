@@ -1,6 +1,6 @@
 import logo from '../../assets/iconopagina.svg';
-
 import { useAuth } from '../../context/AuthContext.jsx'; 
+import './generalStyle.css';
 
 const HeaderComponent = () => {
     const { user, isAuthenticated } = useAuth();
@@ -14,7 +14,7 @@ const HeaderComponent = () => {
                     <h1>Tenis-Plus</h1>
                 </a>
                 {isAuthenticated && user && (
-                    <h3>Buenos dias, {user.first_name} {user.last_name}</h3>
+                    <h3>Buenos dias, {user.first_name}</h3>
                 )}
             </div>
         </>

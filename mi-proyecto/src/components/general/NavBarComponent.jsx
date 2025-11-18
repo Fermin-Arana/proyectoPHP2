@@ -1,6 +1,8 @@
 
 import { useAuth } from '../../context/AuthContext.jsx'
 import { Link, useLocation } from 'react-router-dom'
+import './generalStyle.css'
+
 const NavBarComponent = () =>{
     const { isAdmin, isAuthenticated, user } = useAuth();
     const location = useLocation(); //lo uso para que si ya estoy en una pagina, no me la muestre en la barra de navegacion
@@ -44,17 +46,12 @@ const NavBarComponent = () =>{
                                 <Link to="/editpassword"> Editar contraseña </Link>
                             </li>
                         )}
-                        {location.pathname !== '/logout' && (
-                            <li className="nav-bar-link">
-                                <Link to="/logout"> Cerrar sesion </Link>
-                            </li>
-                        )}
                         {location.pathname !== '/create-booking' && (
                             <li className="nav-bar-link">
                                 <Link to="/create-booking"> Crear reserva </Link>
                             </li>
                         )}
-                        {isAdmin && (
+                        {isAdmin && (
                             <>
                                 {location.pathname !== '/userlist' && (
                                     <li className="nav-bar-link">
@@ -63,6 +60,11 @@ const NavBarComponent = () =>{
                                 )}
                             </>
                         )}
+                        {location.pathname !== '/logout' && (
+                            <li className="nav-bar-link">
+                                <Link to="/logout"> Cerrar sesion </Link>
+                            </li>
+                        )}
                     </>
                 )}
             </ul>

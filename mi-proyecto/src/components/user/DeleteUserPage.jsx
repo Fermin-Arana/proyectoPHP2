@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Button from '../button/Button'
+import './userStyle.css'
 
 const DeleteUserPage = () =>{
     const [ error,setError ] = useState(null);
@@ -27,13 +28,20 @@ const DeleteUserPage = () =>{
             throw error;
         }
     }
-    return (
+return (
         <div className="delete-user-container">
             <h2 className="delete-user-tittle">Borrar usuario</h2>
             <p className="delete-user-message">Estas seguro que quieres borrar este usuario?</p>
-            <Button onClick={handleSubmit}>Si, borrar usuario</Button>
-            <Button onClick={()=>navigate("/userlist")}>No, volver</Button>
+            <div className="delete-user-actions">
+                <Button onClick={handleSubmit} className="delete-confirm-btn">
+                    Si, borrar usuario
+                </Button>
+                <Button onClick={()=>navigate("/userlist")} className="delete-cancel-btn">
+                    No, volver
+                </Button>
             </div>
+             {error && <p className="error-message">Este usuario tiene reservas, no se puede eliminar.</p>}
+        </div>
     )
 }
 

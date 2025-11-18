@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext.jsx';
 import Button from '../button/Button.jsx'
+import './userStyle.css'
 
 const UserList = () => {
     const [users, setUsers] = useState([]);
@@ -38,14 +39,18 @@ const UserList = () => {
                 <div className="users-list"> 
                 {users.map((user,index) => (
                     <li key={index}>
-                        ID:  {' '} 
-                        {user.id}
-                        {'    '}
-                        Email: {' '}
-                        {user.email}
-                        <Button onClick={()=> navigate(`/info-user/${user.id}`)}>Ver usuario</Button>
-                        <Button onClick={()=> navigate(`/edituser/${user.id}`)}>Editar usuario</Button>
-                        <Button onClick={()=> navigate(`/delete-user/${user.id}`)}>Eliminar usuario</Button>
+                        <div className="user-info">
+                            ID:  {' '} 
+                            {user.id}
+                            <br />
+                            Email: {' '}
+                            {user.email}
+                        </div>
+                        <div className="user-actions">
+                            <Button onClick={()=> navigate(`/info-user/${user.id}`)}>Ver usuario</Button>
+                            <Button onClick={()=> navigate(`/edituser/${user.id}`)}>Editar usuario</Button>
+                            <Button onClick={()=> navigate(`/delete-user/${user.id}`)}>Eliminar usuario</Button>
+                        </div>
                     </li>
                 ))}
                 </div>

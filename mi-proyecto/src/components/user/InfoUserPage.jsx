@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { user } from '../../services/apiUsers/user'
 import { useParams } from 'react-router-dom'
+import './userStyle.css'
 
 const InfoUserPage = () =>{
     const { id } = useParams();
@@ -32,13 +33,13 @@ const InfoUserPage = () =>{
     return (
         <div className="info-user-container">
             <h2 className="info-user-tittle">Informacion sobre el usuario con ID: {id}</h2>
-            <div className="info-user-list">
+            <ul className="info-user-list">
                 <li>Nombre completo: {realUser.first_name} {realUser.last_name}</li>
                 <li>Email: {realUser.email}</li>
                 {realUser.admin === 1 && (
-                    <li>Es admin</li>
+                    <li className="admin-badge">Es admin</li>
                 )}
-            </div>
+            </ul>
         </div>
     )
 }

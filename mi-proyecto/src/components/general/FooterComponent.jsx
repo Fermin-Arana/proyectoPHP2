@@ -1,4 +1,4 @@
-
+import './generalStyle.css';
 const FooterComponent = () => {
     return(
         <>

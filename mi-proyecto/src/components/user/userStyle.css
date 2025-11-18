@@ -1,0 +1,308 @@
+
+.users-list-container,
+.info-user-container,
+.edit-user-container,
+.delete-user-container, 
+.edit-password-container { 
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    margin: 0 auto 30px auto;
+    max-width: 600px; 
+    width: 95%;
+}
+
+.users-list-tittle,
+.info-user-tittle,
+.edit-user-tittle,
+.edit-password-container h2,
+.delete-user-tittle { 
+    color: #212529;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 700;
+    border-bottom: 2px solid #007BFF;
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 10px;
+}
+
+.users-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.users-list li {
+    background-color: #F8F9FA;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    transition: all 0.2s ease-in-out;
+}
+
+.users-list li:hover {
+    background-color: #FFFFFF;
+    border-color: #007BFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex: 1;
+}
+
+.user-info strong {
+    color: #212529;
+    margin-right: 5px;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 400px;
+}
+
+.no-admin-container {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.info-user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.info-user-list li {
+    padding: 15px 20px;
+    border-bottom: 1px solid #dee2e6; 
+    font-size: 1.1rem;
+    color: #495057;
+    display: flex;
+    align-items: center;
+}
+
+.info-user-list li:last-child {
+    border-bottom: none;
+}
+
+.info-user-list li.admin-badge {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+    padding: 8px 15px;
+    font-weight: 600;
+    margin-top: 15px; 
+}
+
+
+.loading-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #007BFF;
+    font-weight: 600;
+    margin-top: 50px;
+}
+
+
+.edit-user-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 20px;
+}
+
+.edit-user-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    width: 100%;
+    max-width: 400px; 
+}
+
+
+.form-input {
+    padding: 12px 15px;
+    border: 1px solid #dee2e6; 
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #495057;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #007BFF; 
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+
+.edit-btn {
+    margin-top: 10px;
+    width: 100%;
+}
+
+
+
+.not-autenticated-container {
+    text-align: center;
+    padding: 40px;
+    background-color: #f8f9fa; 
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-top: 20px;
+}
+
+.not-autenticated-message {
+    color: #dc3545; 
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.not-autenticated-container a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.not-autenticated-container a:hover {
+    color: #0056b3;
+}
+
+
+.error-messages {
+    list-style: none; 
+    padding: 15px;
+    margin: 0 0 20px 0;
+    background-color: #f8d7da; 
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+}
+
+.error-messages li {
+    color: #721c24; 
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+}
+
+.error-messages li:last-child {
+    margin-bottom: 0;
+}
+
+
+.edit-password-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.edit-password-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 400px;
+}
+
+
+.edit-password-button {
+    margin-top: 10px;
+    width: 100%;
+}
+
+
+.delete-user-message {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #495057;
+    margin-bottom: 30px;
+}
+
+.delete-user-actions {
+    display: flex;
+    justify-content: center; 
+    gap: 15px;
+}
+
+.delete-confirm-btn {
+    background-color: #dc3545;
+}
+.delete-confirm-btn:hover {
+    background-color: #bb2d3b;
+}
+
+.delete-cancel-btn {
+    background-color: #6c757d;
+}
+.delete-cancel-btn:hover {
+    background-color: #5c636a;
+}
+
+
+@media (max-width: 600px) {
+    .delete-user-actions {
+        flex-direction: column;
+    }
+    .delete-confirm-btn, .delete-cancel-btn {
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 900px) {
+    .users-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    .user-actions {
+        width: 100%;
+        justify-content: space-between;
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+    .user-actions button {
+        flex-grow: 1;
+    }
+
+    .info-user-list li {
+        font-size: 1rem; 
+        padding: 12px 15px;
+    }
+}

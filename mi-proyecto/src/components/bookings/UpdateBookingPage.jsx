@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { updateBookingParticipants } from '../../services/apiBooking/updateBookingParticipant'
 import { searchUsers } from '../../services/apiUsers/searchUser'
 import { bookingParticipant } from '../../services/apiBooking/bookingParticipant'
+import './bookingStyle.css';
 
 
 const UpdateBookingPage = () =>{
@@ -71,28 +72,35 @@ const UpdateBookingPage = () =>{
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h2>Modificar participantes</h2>
-            {error && <p className="error-message">{error}</p>}
-            <div className="participants-list">
-                {userList.map(u =>(
-                    <div key={u.id} className="participant-box">
-                        <input
-                            type="checkbox"
-                            id={`user-${u.id}`}
-                            value={u.id}
-                            checked={participants.includes(u.id)}
-                            onChange={() => handleParticipantChange(u.id)}
-                        />
-                        <label htmlFor={`user-${u.id}`}> 
-                            {u.first_name} {u.last_name} ({u.email}) 
-                        </label>
+        <div className="update-booking-container">
+            <form onSubmit={handleSubmit}>
+                <h2>Modificar participantes</h2>
+                {error && <p className="error-message">{error}</p>}
+                <div className="form-container">
+                    <label>Selecciona a tus nuevos compañeros: </label>
+                    <div className="participants-checkbox-list">
+                        {userList.map(u =>(
+                            <div key={u.id} className="participant-checkbox">
+                                <input
+                                    type="checkbox"
+                                    id={`user-${u.id}`}
+                                    value={u.id}
+                                    checked={participants.includes(u.id)}
+                                    onChange={() => handleParticipantChange(u.id)}
+                                />
+                                <label htmlFor={`user-${u.id}`}> 
+                                    {u.first_name} {u.last_name} ({u.email}) 
+                                </label>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-            <Button type="submit">Guardar cambios</Button>
-            <Button onClick={()=>navigate(`/delete-booking/${id}`)}>Borrar reserva</Button>
-        </form>
+                </div>
+                <div className="update-booking-actions">
+                    <Button type="submit">Guardar cambios</Button>
+                    <Button type="button" onClick={()=>navigate(`/delete-booking/${id}`)} className="btn-danger">Borrar reserva</Button>
+                </div>
+            </form>
+        </div>
     )
 }
 
